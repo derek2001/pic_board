@@ -18,7 +18,7 @@
         }
     </style>
 {/literal}
-{assign var="module_name" value="Sample Board"}
+{assign var="module_name" value="Picture Board"}
 {include file="module_header.tpl"}
 
 {assign var="table_width" value="1222"}
@@ -47,33 +47,21 @@
         && (!is_array($data[f].history)
         && !is_array($data[f].history[0].id_frame)
         && $data[f].history[0].id_frame.old_sign == '')}
-
     {else}
         {counter}
         <div class="test" id="{$data[f].id_slab}_{$data[f].id_frame}"
              style="font-size: 11px; float:left; width:40px; margin: 3px;
                      padding: 1px; border: 1px solid black;
-             {if $data[f].slab_board == 1}
-                 {if $data[f].slab_nbr == 0}
-                         background-color: #ffffff;
-                 {else}
-                         background-color: #c2f19f;
-                     {if $data[f].slab_nbr < 3}color: #ff0000;{/if}
-                 {/if}
+             {if $data[f].erp_count.cnt_erp > 2 && $data[f].www_count.cnt_www > 2}
+                 background-color: #c2f19f;
+             {elseif $data[f].raw_count.cnt_raw > 0}
+                 background-color: #ffa399; color: #ffffff;
              {else}
-                 {if is_array($data[f].history) && is_array($data[f].history[0].id_frame) && $data[f].history[0].id_frame.old_sign != ''}
-                         background-color: orange;
-                 {else}
-                     {if $data[f].slab_nbr > 1}
-                             background-color: #ffa399;
-                     {elseif $data[f].slab_nbr == 1}
-                             background-color: #ffa399; color: #ffffff;
-                     {else}
-                             background-color: #ffffff;
-                     {/if}
-                 {/if}
+                 background-color: #ffa399;
              {/if};
-                     text-align:center">
+
+            text-align:center">
+
             <span class='sign'>
                 {$data[f].sign}
             </span>
