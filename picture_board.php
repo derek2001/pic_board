@@ -190,44 +190,19 @@ foreach($dup as $dups) {
 
 $raw_count = array();
 foreach($samples as $k=>$sample) {
-
-    $_SESSION["user"]->db->select("select sl.id_frame as id, count(sl.type) as cnt_raw
+    $_SESSION["user"]->db->select("select sl.id_frame as id,
+            (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_frame = slc.id_frame) cnt_raw,
+            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_frame = sla.id_frame) cnt_erp,
+            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_frame = slb.id_frame) cnt_www
             from [dbo].[stone_image] sl
             where sl.id_frame = ".$sample['id_frame']."
-            and sl.type = 0
-            group by sl.id_frame");
+            group by sl.id_frame
+            ");
 
-    //echo $sql;
     $cnt = $_SESSION["user"]->db->fetchArray();
     if($_SESSION["user"]->db->numrows() > 0)
     {
-        $samples[$k]['raw_count'] = $cnt;
-    }
-
-    $_SESSION["user"]->db->select("select sl.id_frame as id, count(sl.type) as cnt_erp
-            from [dbo].[stone_image] sl
-            where sl.id_frame = ".$sample['id_frame']."
-            and sl.type = 1
-            group by sl.id_frame");
-
-    //echo $sql;
-    $cnt = $_SESSION["user"]->db->fetchArray();
-    if($_SESSION["user"]->db->numrows() > 0)
-    {
-        $samples[$k]['erp_count'] = $cnt;
-    }
-
-    $_SESSION["user"]->db->select("select sl.id_frame as id, count(sl.type) as cnt_www
-            from [dbo].[stone_image] sl
-            where sl.id_frame = ".$sample['id_frame']."
-            and sl.type = 2
-            group by sl.id_frame");
-
-    //echo $sql;
-    $cnt = $_SESSION["user"]->db->fetchArray();
-    if($_SESSION["user"]->db->numrows() > 0)
-    {
-        $samples[$k]['www_count'] = $cnt;
+        $samples[$k]['pic_count'] = $cnt;
     }
 }
 

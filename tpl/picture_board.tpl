@@ -52,9 +52,9 @@
         <div class="test" id="{$data[f].id_slab}_{$data[f].id_frame}"
              style="font-size: 11px; float:left; width:40px; margin: 3px;
                      padding: 1px; border: 1px solid black;
-             {if $data[f].erp_count.cnt_erp > 2 && $data[f].www_count.cnt_www > 2}
+             {if $data[f].pic_count.cnt_erp > 2 && $data[f].pic_count.cnt_www > 2}
                  background-color: #c2f19f;
-             {elseif $data[f].raw_count.cnt_raw > 0}
+             {elseif $data[f].pic_count.cnt_raw > 0}
                  background-color: #ffa399; color: #ffffff;
              {else}
                  background-color: #ffa399;

@@ -28,9 +28,9 @@
                   {if strripos($data.unit[unt].slab.st_name, 'Blue Pearl') !== false}<br><span style="background-color: black; color:white; font-weight: bold">PAY ATTENTION TO DIRECTION OF THE FLAKES</span>{/if}</td></tr>
           <tr><td align=left style="FONT: 14px arial,verdana,tahoma" nowrap><B>Installation Date:&nbsp;</B>{section name=ist loop=$data.unit[unt].inst}
                   {if !$smarty.section.ist.first},{/if}<b><u>{$data.unit[unt].inst[ist].inst_date|date_format:'%m/%d/%Y'}</b></u> (<b><u>{$data.unit[unt].inst[ist].installer}</b></u>){/section}</td>
-              {if $data.unit[unt].slab.sign != ''}
-                {if $data.unit[unt].cnt_raw.cnt_raw<1 && ($data.unit[unt].cnt_erp.cnt_erp<3 || $data.unit[unt].cnt_www.cnt_www<3) }
-                  <td align=right style="FONT: 20px arial,verdana,tahoma" nowrap>Picture Needed</td>
+              {if $data.unit[unt].slab.sign != '' && $data.unit[unt].status.status < 5}
+                {if $data.unit[unt].cnt_pic.cnt_raw<1 && ($data.unit[unt].cnt_pic.cnt_erp<3 || $data.unit[unt].cnt_pic.cnt_www<3) }
+                  <td align=right style="FONT: 20px arial,verdana,tahoma" nowrap>Pictures Needed</td>
                 {/if}
               {/if}
           </tr>

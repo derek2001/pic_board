@@ -164,36 +164,30 @@ class PrintOrder
          if (is_array($ord_slab))
            foreach($ord_slab as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['slab'] = $v;
 
+         //unit status
+         $_SESSION['user']->db->select('select os.id_ord_unit, o.status as status
+         from [ord_slab] os
+         inner join [ord_unit] ou on ou.id = os.id_ord_unit
+         inner join [order] o on ou.id_order = o.id
+         left join [ord_status] osts on o.status=osts.value
+         where os.id_ord_unit IN ('.$unit_list.')');
+         $ord_slab = $_SESSION['user']->db->fetchAllArrays();
+         if (is_array($ord_slab))
+            foreach($ord_slab as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['status'] = $v;
+
          //picture status
-         $_SESSION['user']->db->select('select os.id_ord_unit, si.id_frame as id, count(si.type) as cnt_raw from [ord_slab] os
-         inner join slab_frame sf on sf.id = os.id_slab_frame
-         inner join stone_image si on si.id_frame = sf.id_frame
-         where id_ord_unit IN ('.$unit_list.')
-         and si.type = 0
-         group by si.id_frame, os.id_ord_unit');
+         $_SESSION['user']->db->select('select os.id_ord_unit, sf.id_frame as id,
+         (select count(sia.type) from [stone_image] sia where sia.id_frame = sf.id_frame and sia.type = 0)as cnt_raw,
+         (select count(sib.type) from [stone_image] sib where sib.id_frame = sf.id_frame and sib.type = 1)as cnt_erp,
+         (select count(sic.type) from [stone_image] sic where sic.id_frame = sf.id_frame and sic.type = 2)as cnt_www
+         from [ord_slab] os
+         inner join [slab_frame] sf on sf.id = os.id_slab_frame
+         inner join [stone_image] si on si.id_frame = sf.id_frame
+         where os.id_ord_unit IN ('.$unit_list.')
+         group by sf.id_frame, os.id_ord_unit');
          $cnt_raw = $_SESSION['user']->db->fetchAllArrays();
          if(is_array($cnt_raw))
-            foreach($cnt_raw as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['cnt_raw'] = $v;
-
-         $_SESSION['user']->db->select('select os.id_ord_unit, si.id_frame as id, count(si.type) as cnt_erp from [ord_slab] os
-         inner join slab_frame sf on sf.id = os.id_slab_frame
-         inner join stone_image si on si.id_frame = sf.id_frame
-         where id_ord_unit IN ('.$unit_list.')
-         and si.type = 1
-         group by si.id_frame, os.id_ord_unit');
-         $cnt_erp = $_SESSION['user']->db->fetchAllArrays();
-         if (is_array($cnt_erp))
-           foreach($cnt_erp as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['cnt_erp'] = $v;
-
-         $_SESSION['user']->db->select('select os.id_ord_unit, si.id_frame as id, count(si.type) as cnt_www from [ord_slab] os
-         inner join slab_frame sf on sf.id = os.id_slab_frame
-         inner join stone_image si on si.id_frame = sf.id_frame
-         where id_ord_unit IN ('.$unit_list.')
-         and si.type = 2
-         group by si.id_frame, os.id_ord_unit');
-         $cnt_www = $_SESSION['user']->db->fetchAllArrays();
-         if (is_array($cnt_www))
-           foreach($cnt_www as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['cnt_www'] = $v;
+            foreach($cnt_raw as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['cnt_pic'] = $v;
 
          //edges
          $_SESSION['user']->db->select('select oe.*,0 as e_status,e.name,e.picture from [ord_edge] oe inner join edge e on e.id=oe.id_edge where oe.id_ord_unit IN ('.$unit_list.') and oe.length>0');
