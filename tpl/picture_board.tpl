@@ -2,6 +2,20 @@
 <script type="text/javascript" src="js/design.js"></script>
 <script type="text/javascript" src="js/ajax/jquery-1.4.2.js"></script>
 {literal}
+    <script>
+        var newWind = null;
+        $(document).ready(function(){
+
+            $(".test div").click(function(e) {
+                var arr_ids = this.id.split('_');
+                if(newWind==null || newWind.closed)
+                    newWind=window.open('editframepictures.php?slab_frame_id='+arr_ids[0]+'&slab_id='+arr_ids[1]+'&frame_id='+arr_ids[2], 'editframepictures','width=820,height=540,left=100,top=30,menubar=yes,resizable=yes,scrollbars,toolbar=yes');
+            });
+        });
+
+    </script>
+{/literal}
+{literal}
     <style>
         em {
             width: 250px;
@@ -49,7 +63,7 @@
         && $data[f].history[0].id_frame.old_sign == '')}
     {else}
         {counter}
-        <div class="test" id="{$data[f].id_slab}_{$data[f].id_frame}"
+        <div class="test" id="{$data[f].id}_{$data[f].id_slab}_{$data[f].id_frame}"
              style="font-size: 11px; float:left; width:40px; margin: 3px;
                      padding: 1px; border: 1px solid black;
              {if $data[f].pic_count.cnt_erp > 2 && $data[f].pic_count.cnt_www > 2}

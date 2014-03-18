@@ -190,13 +190,13 @@ foreach($dup as $dups) {
 
 $raw_count = array();
 foreach($samples as $k=>$sample) {
-    $_SESSION["user"]->db->select("select sl.id_frame as id,
-            (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_frame = slc.id_frame) cnt_raw,
-            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_frame = sla.id_frame) cnt_erp,
-            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_frame = slb.id_frame) cnt_www
+    $_SESSION["user"]->db->select("select sl.id_slab_frame as id,
+            (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_slab_frame = slc.id_slab_frame) cnt_raw,
+            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_slab_frame = sla.id_slab_frame) cnt_erp,
+            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_slab_frame = slb.id_slab_frame) cnt_www
             from [dbo].[stone_image] sl
-            where sl.id_frame = ".$sample['id_frame']."
-            group by sl.id_frame
+            where sl.id_slab_frame = ".$sample['id']."
+            group by sl.id_slab_frame
             ");
 
     $cnt = $_SESSION["user"]->db->fetchArray();
