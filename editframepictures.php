@@ -162,8 +162,8 @@ if (error != "")
         if ($id != 0) {
             if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']))
             {
-                $sql_update = 'UPDATE stone_image SET status = 1, update_date = GETDATE() WHERE id ='.$id;
-                if(!$_SESSION["user"]->db->update('stone_image', $id, $sql_update))
+                $sql_update = 'UPDATE [stone_image] SET status = 1, update_date = GETDATE() WHERE id ='.$id;
+                if(!$_SESSION["user"]->db->update('[stone_image]', $id, $sql_update))
                 {
                     $error = "Saving data failed.";
                 }

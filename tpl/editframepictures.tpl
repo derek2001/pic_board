@@ -167,9 +167,6 @@ a.disabled
             {/if}
         </td>
     </tr>
-    <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
-        <td nowrap>Linked gallery:</td><td> <input type="checkbox" name="linked_gallery" /> </td>
-    </tr>
     <tr >
         <td colspan="2">
             <input type="button" class="BUTTON_CANCEL" value="Cancel" onclick="window.close()"/>&nbsp;&nbsp;
