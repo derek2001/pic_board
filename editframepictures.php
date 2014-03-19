@@ -151,29 +151,32 @@ if (isset($_GET['act'])) {
 // end - deleting
 
 // checking the count of status=1 (checked) items for each picture type
-if (count($_POST['erp_picture_status']) > 3) {$error = "Number of checked erp images is greater than 3";}
-if (count($_POST['www_picture_status']) > 3) {$error = "Number of checked www images is greater than 3";}
+if (count($_POST['erp_picture_status']) > 3) {$error = "Number of checked erp images is greater than 3"; $flag = 1;}
+if (count($_POST['www_picture_status']) > 3) {$error = "Number of checked www images is greater than 3"; $flag = 1;}
 
 if (error != "")
 {
     // update status
-    for ($i = 0; $i < count($_POST['id']); $i++)
+    if($flag != 1)
     {
-        $id = (int)$_POST['id'][$i];
-        if ($id != 0) {
-            if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']))
-            {
-                $sql_update = 'UPDATE [stone_image] SET status = 1, update_date = GETDATE() WHERE id ='.$id;
-                if(!$_SESSION["user"]->db->update('[stone_image]', $id, $sql_update))
+        for ($i = 0; $i < count($_POST['id']); $i++)
+        {
+            $id = (int)$_POST['id'][$i];
+            if ($id != 0) {
+                if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']))
                 {
-                    $error = "Saving data failed.";
-                }
-            } else
-            {
-                $sql_update = 'UPDATE stone_image SET status = 0, update_date = GETDATE() WHERE id ='.$id;
-                if(!$_SESSION["user"]->db->update('stone_image', $id, $sql_update))
+                    $sql_update = 'UPDATE [stone_image] SET status = 1, update_date = GETDATE() WHERE id ='.$id;
+                    if(!$_SESSION["user"]->db->update('[stone_image]', $id, $sql_update))
+                    {
+                        $error = "Saving data failed.";
+                    }
+                } else
                 {
-                    $error = "Saving data failed.";
+                    $sql_update = 'UPDATE stone_image SET status = 0, update_date = GETDATE() WHERE id ='.$id;
+                    if(!$_SESSION["user"]->db->update('stone_image', $id, $sql_update))
+                    {
+                        $error = "Saving data failed.";
+                    }
                 }
             }
         }
