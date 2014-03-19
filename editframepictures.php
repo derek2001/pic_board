@@ -60,6 +60,7 @@ function uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_i
                 default:
                     $label = "[label]";
             }
+
             $thumb_nail_name = $fileName . "_THUMB";
             $sql_insert = "INSERT INTO stone_image (id_slab_frame, id_frame, id_slab, label, type, size, status, is_linked, full_path, full_path_thumbnail, create_date, update_date) VALUES
                 (".$slab_frame_id.", ".$frame_id.", ".$slab_id.", '".$label."', ".$imageType.", ".$imageSize.",0, 0, '".$fileName."', '".$thumb_nail_name."', GETDATE(), GETDATE())";
@@ -187,7 +188,7 @@ if (error != "")
         {
             $tmpFilePath = $_FILES['picture_to_upload_'.PictureType::RAWPicture]['tmp_name'][$i];
             if (isImageNameValid($fileName))
-                uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_id, PictureType::RAWPicture, null);
+                uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_id, PictureType::RAWPicture, PictureSize::FullView);
             else
                 $error = 'File with the name '.$fileName.' already exists';
         }
