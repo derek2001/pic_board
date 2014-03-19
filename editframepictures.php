@@ -14,6 +14,7 @@ abstract class PictureSize
     const FullView = 0;
     const MediumView = 1;
     const MacroView = 2;
+    const RawView = 3;
 }
 
 abstract class PictureStatus
@@ -56,6 +57,9 @@ function uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_i
                     break;
                 case PictureSize::MacroView:
                     $label = "Macro View";
+                    break;
+                case PictureSize::RawView:
+                    $label = "Raw";
                     break;
                 default:
                     $label = "[label]";
@@ -191,7 +195,7 @@ if (error != "")
         {
             $tmpFilePath = $_FILES['picture_to_upload_'.PictureType::RAWPicture]['tmp_name'][$i];
             if (isImageNameValid($fileName))
-                uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_id, PictureType::RAWPicture, PictureSize::FullView);
+                uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_id, PictureType::RAWPicture, PictureSize::RawView);
             else
                 $error = 'File with the name '.$fileName.' already exists';
         }
