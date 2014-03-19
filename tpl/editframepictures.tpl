@@ -11,6 +11,30 @@
                 return false;
             }
         });
+        // validates counts of checked images by type
+        $('#form_editframepictures').submit(function(e) {
+            var erpFullCount = $('input[type="checkbox"][id*="status_1_0"]:checked').length;
+            var erpMediumCount = $('input[type="checkbox"][id*="status_1_1"]:checked').length;
+            var erpMacroCount = $('input[type="checkbox"][id*="status_1_2"]:checked').length;
+            var wwwFullCount = $('input[type="checkbox"][id*="status_2_0"]:checked').length;
+            var wwwMediumCount = $('input[type="checkbox"][id*="status_2_1"]:checked').length;
+            var wwwMacroCount = $('input[type="checkbox"][id*="status_2_2"]:checked').length;
+
+            if (erpFullCount > 1 || erpMediumCount > 1 || erpMacroCount > 1)
+            {
+                var errorMessage = "You can only check one erp image of the same type (full or medium or macro)";
+                alert (errorMessage);
+                return false;
+            }
+            if (wwwFullCount > 1 || wwwMediumCount > 1 || wwwMacroCount > 1)
+            {
+                var errorMessage = "You can only check one www image of the same type (full or medium or macro)";
+                alert (errorMessage);
+                return false;
+            }
+
+            return true;
+        });
     });
 {/literal}
 </script>
@@ -87,7 +111,7 @@ a.disabled
                     <td width="100%">
                         <input type="hidden" name="id[]" value="{$pics_raw[i].id}" />
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
-                        <input type="checkbox" value="{$pics_raw[i].id}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id_slab_frame == 0} disabled="disabled" {/if} />
+                        <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id_slab_frame == 0} disabled="disabled" {/if} />
                         {if $pics_raw[i].stone_id != 0}
                             <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
                         {else}
@@ -117,7 +141,7 @@ a.disabled
                         <td>
                             <input type="hidden" name="id[]" value="{$pics_erp[i].id}" />
                             <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}_{$pics_erp[i].size}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
-                            <input type="checkbox" value="{$pics_erp[i].id}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id_slab_frame == 0} disabled="disabled" {/if} />
+                            <input type="checkbox" value="{$pics_erp[i].id}" id="{$pics_erp[i].id}_status_{$pics_erp[i].type}_{$pics_erp[i].size}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id_slab_frame == 0} disabled="disabled" {/if} />
                             {if $pics_erp[i].id_slab_frame != 0}
                                 <a  class="imagePreview"  href="{$pics_erp[i].full_path}" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
                             {else}
@@ -147,7 +171,7 @@ a.disabled
                     <td>
                         <input type="hidden" name="id[]" value="{$pics_www[i].id}" />
                         <input type="file" {if $pics_www[i].id_slab_frame != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
-                        <input type="checkbox" value="{$pics_www[i].id}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id_slab_frame == 0} disabled="disabled" {/if} />
+                        <input type="checkbox" value="{$pics_www[i].id}" id="{$pics_www[i].id}_status_{$pics_www[i].type}_{$pics_www[i].size}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id_slab_frame == 0} disabled="disabled" {/if} />
                         {if $pics_www[i].id_slab_frame != 0}
                             <a  class="imagePreview"  href="{$pics_www[i].full_path}" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
                         {else}
