@@ -89,7 +89,7 @@ a.disabled
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
                         <input type="checkbox" value="{$pics_raw[i].id}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id_slab_frame == 0} disabled="disabled" {/if} />
                         {if $pics_raw[i].stone_id != 0}
-                            <a  class="imagePreview"  href="__STONE_PICS/{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
+                            <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
                         {else}
                             <a href="#" class="disabled">{$pics_raw[i].label}</a>
                         {/if}
@@ -119,7 +119,7 @@ a.disabled
                             <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}_{$pics_erp[i].size}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
                             <input type="checkbox" value="{$pics_erp[i].id}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id_slab_frame == 0} disabled="disabled" {/if} />
                             {if $pics_erp[i].id_slab_frame != 0}
-                                <a  class="imagePreview"  href="__STONE_PICS/{$pics_erp[i].full_path}" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
+                                <a  class="imagePreview"  href="{$pics_erp[i].full_path}" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
                             {else}
                                 <a href="#" class="disabled">{$pics_erp[i].label}</a>
                             {/if}
@@ -149,7 +149,7 @@ a.disabled
                         <input type="file" {if $pics_www[i].id_slab_frame != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
                         <input type="checkbox" value="{$pics_www[i].id}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id_slab_frame == 0} disabled="disabled" {/if} />
                         {if $pics_www[i].id_slab_frame != 0}
-                            <a  class="imagePreview"  href="__STONE_PICS/{$pics_www[i].full_path}" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
+                            <a  class="imagePreview"  href="{$pics_www[i].full_path}" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
                         {else}
                             <a href="#" class="disabled">{$pics_www[i].label}</a>
                         {/if}

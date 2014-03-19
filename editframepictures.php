@@ -297,8 +297,8 @@ if (error != "")
     $stone = $_SESSION["user"]->db->fetchArray();
 
     // get picture information by stone id
-    $sql_pictures = "SELECT si.id, si.id_slab_frame, si.id_frame, si.id_slab, si.label, si.type, si.size, si.status, si.is_linked, si.full_path, "
-        . "'__STONE_PICS/' + si.full_path_thumbnail AS 'full_path_thumbnail' from stone_image si WHERE id_slab_frame=".$slab_frame_id
+    $sql_pictures = "SELECT si.id, si.id_slab_frame, si.id_frame, si.id_slab, si.label, si.type, si.size, si.status, si.is_linked, '" .UPLOAD_PATH. "' + si.full_path as 'full_path', '"
+        . UPLOAD_PATH. "' + si.full_path_thumbnail AS 'full_path_thumbnail' from stone_image si WHERE id_slab_frame=".$slab_frame_id
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Full View' as label, 1 as type, 0 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Medium View' as label, 1 as type, 1 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Macro View' as label, 1 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
