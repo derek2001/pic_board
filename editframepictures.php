@@ -336,7 +336,7 @@ if (error != "")
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Medium View' as label, 2 as type, 1 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Macro View' as label, 2 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'RAW' as label, 0 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail
-        ORDER BY id_slab_frame, size"
+        ORDER BY id_slab_frame, si.id_frame, size"
     ;
     // TODO: make union to display new upload items
 
