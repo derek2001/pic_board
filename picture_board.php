@@ -190,13 +190,19 @@ foreach($dup as $dups) {
 
 $raw_count = array();
 foreach($samples as $k=>$sample) {
-    $_SESSION["user"]->db->select("select sl.id_slab_frame as id,
-            (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_slab_frame = slc.id_slab_frame) cnt_raw,
-            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_slab_frame = sla.id_slab_frame) cnt_erp,
-            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_slab_frame = slb.id_slab_frame) cnt_www
+    if(strcmp($sample['id'], '') == 0)
+        $id = 0;
+    else
+        $id = $sample['id'];
+    $_SESSION["user"]->db->select("select sl.id_slab_frame as id, sl.id_slab, sl.id_frame,
+            (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_slab_frame = slc.id_slab_frame and sl.id_slab = slc.id_slab and sl.id_frame = slc.id_frame) cnt_raw,
+            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_slab_frame = sla.id_slab_frame and sl.id_slab = sla.id_slab and sl.id_frame = sla.id_frame) cnt_erp,
+            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_slab_frame = slb.id_slab_frame and sl.id_slab = slb.id_slab and sl.id_frame = slb.id_frame) cnt_www
             from [dbo].[stone_image] sl
-            where sl.id_slab_frame = ".$sample['id']."
-            group by sl.id_slab_frame
+            where sl.id_slab_frame = ".$id."
+            and sl.id_slab = ".$sample['id_slab']."
+            and sl.id_frame = ".$sample['id_frame']."
+            group by sl.id_slab_frame, sl.id_slab, sl.id_frame
             ");
 
     $cnt = $_SESSION["user"]->db->fetchArray();

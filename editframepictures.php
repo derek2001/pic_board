@@ -291,12 +291,24 @@ if (error != "")
     // when postback we use stone_id instead of frame and slab
     //if ($stone_id == 0) {
         // get stone information by slab_id and frame_id
-        $sql_stone = 'SELECT st.id, st.name, sf.id_frame, f.sign AS "frame_sign", l.name AS "location_name" FROM slab_frame sf
-            INNER JOIN frame f ON f.id=sf.id_frame
-            INNER JOIN slab s ON s.id=sf.id_slab
-            INNER JOIN stone st ON st.id=s.id_stone
-            INNER JOIN location l ON s.id_location = l.id
-        WHERE sf.id_slab='.$slab_id.' AND sf.id_frame='.$frame_id;
+        if($slab_frame_id != 0)
+        {
+            $sql_stone = 'SELECT st.id, st.name, sf.id_frame, f.sign AS "frame_sign", l.name AS "location_name" FROM slab_frame sf
+                INNER JOIN frame f ON f.id=sf.id_frame
+                INNER JOIN slab s ON s.id=sf.id_slab
+                INNER JOIN stone st ON st.id=s.id_stone
+                INNER JOIN location l ON s.id_location = l.id
+            WHERE sf.id_slab='.$slab_id.' AND sf.id_frame='.$frame_id;
+        }
+        else
+        {
+            $sql_stone = 'SELECT st.id, st.name, sf.id_frame, f.sign AS "frame_sign", l.name AS "location_name" FROM slab_frame_duplicate sf
+                INNER JOIN frame f ON f.id=sf.id_frame
+                INNER JOIN slab s ON s.id=sf.id_slab
+                INNER JOIN stone st ON st.id=s.id_stone
+                INNER JOIN location l ON s.id_location = l.id
+            WHERE sf.id_slab='.$slab_id.' AND sf.id_frame='.$frame_id;
+        }
 
     //}
     /*
@@ -316,14 +328,15 @@ if (error != "")
 
     // get picture information by stone id
     $sql_pictures = "SELECT si.id, si.id_slab_frame, si.id_frame, si.id_slab, si.label, si.type, si.size, si.status, si.is_linked, '" .UPLOAD_PATH. "' + si.full_path as 'full_path', '"
-        . UPLOAD_PATH. "' + si.full_path_thumbnail AS 'full_path_thumbnail' from stone_image si WHERE id_slab_frame=".$slab_frame_id
+        . UPLOAD_PATH. "' + si.full_path_thumbnail AS 'full_path_thumbnail' from stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Full View' as label, 1 as type, 0 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Medium View' as label, 1 as type, 1 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Macro View' as label, 1 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Full View' as label, 2 as type, 0 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Medium View' as label, 2 as type, 1 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
         . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Macro View' as label, 2 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'RAW' as label, 0 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail ORDER BY id_slab_frame, size"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'RAW' as label, 0 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail
+        ORDER BY id_slab_frame, size"
     ;
     // TODO: make union to display new upload items
 

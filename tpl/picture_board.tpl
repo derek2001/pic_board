@@ -9,13 +9,15 @@
             $(".test div").click(function(e) {
                 var arr_ids = this.id.split('_');
                 if(newWind==null || newWind.closed)
-                    newWind=window.open('editframepictures.php?slab_frame_id='+arr_ids[0]+'&slab_id='+arr_ids[1]+'&frame_id='+arr_ids[2], 'editframepictures','width=820,height=540,left=100,top=30,location=no,menubar=yes,resizable=yes,scrollbars,toolbar=yes');
+                    newWind=window.open('editframepictures.php?slab_frame_id='+arr_ids[0]+'&slab_id='+arr_ids[1]+'&frame_id='+arr_ids[2],
+                            'editframepictures','width=820,height=540,left=100,top=30,location=no,menubar=yes,resizable=yes,scrollbars,toolbar=yes');
             });
         });
 
     </script>
 {/literal}
 {literal}
+    <meta http-equiv="refresh" content="60000">
     <style>
         em {
             width: 250px;
@@ -73,7 +75,6 @@
              {else}
                  background-color: #ffa399;
              {/if};
-
             text-align:center">
 
             <span class='sign'>
