@@ -143,7 +143,18 @@ if (isset($_GET['act'])) {
                 $_GET['id'] = 0;
 
             $id = (int)$_GET['id'];
+            $query = 'SELECT id, full_path FROM stone_image WHERE id='.$id;
+            $_SESSION["user"]->db->select($query);
+            $image = $_SESSION["user"]->db->fetchArray();
             // TODO: delete from hdd
+            if (!empty($image['full_path'])) {
+                $filePath = UPLOAD_PATH.$image['full_path'];
+                if (is_file($filePath)) {
+                    // remove if file exists
+                    unlink($filePath);
+                }
+            }
+            // removing from db
             $query = 'DELETE FROM stone_image WHERE id='.$id.'';
             $_SESSION["user"]->db->delete('stone_image', $id, $query);
             break;
@@ -167,7 +178,7 @@ if (error != "")
         {
             $id = (int)$_POST['id'][$i];
             if ($id != 0) {
-                if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']))
+                if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']) || in_array($id, $_POST['raw_picture_status']))
                 {
                     $sql_update = 'UPDATE [stone_image] SET status = 1, update_date = GETDATE() WHERE id ='.$id;
                     if(!$_SESSION["user"]->db->update('[stone_image]', $id, $sql_update))
