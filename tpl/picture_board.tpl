@@ -43,16 +43,18 @@
 
 <tr>
     <td align="right" width="55%">
+        <div style="float:right;"> &nbsp;&nbsp;&nbsp;&nbsp; </div>
         <div style="width:70px; background-color: #c2f19f; border: 1px solid black; float:right; font-size:11px">DONE</div>
         <div style="float:right; padding:0 5px 0 5px"> | </div>
-        <div style="width:70px; background-color: #ffa399; border: 1px solid black; float:right; font-size:11px">NOT DONE</div>
+        <div style="width:70px; background-color: #ffa399; color:white; border: 1px solid black; float:right; font-size:11px">RAW OK</div>
         <div style="float:right; padding:0 5px 0 5px"> | </div>
-        <div style="width:70px; background-color: #ffa399; color:white; border: 1px solid black; float:right; font-size:11px">RAW OK</div></td>
+        <div style="width:70px; background-color: #ffa399; border: 1px solid black; float:right; font-size:11px">NOT DONE</div>
     </td>
 </tr>
+<tr>
 <td colspan="2">
 <br>
-{counter start=0 print=false assign="cnt"}
+{counter start=0 print=false assign="cnt" }
 <span class="test">
 {section name=f loop=$data}
     <span>
