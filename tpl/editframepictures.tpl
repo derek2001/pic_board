@@ -48,6 +48,16 @@
 {/literal}
 </script>
 
+<script language="JavaScript">
+{literal}
+    function openPopupImage(filePath)
+    {
+        newWind=window.open("" + filePath,
+                'imagepopup','width=820,height=540,left=150,top=80,location=no,menubar=no,resizable=yes,scrollbars,toolbar=no');
+    }
+{/literal}
+</script>
+
 <style type="text/css">
 {literal}
 #imagePreview {
@@ -122,7 +132,9 @@ a.disabled
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
                         <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id == 0} disabled="disabled" {/if} />
                         {if $pics_raw[i].id != 0}
-                            <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
+                            <a href="#" class="disabled" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
+                            <!--
+                            <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a> -->
                         {else}
                             <a href="#" class="disabled">{$pics_raw[i].label}</a>
                         {/if}
@@ -152,7 +164,10 @@ a.disabled
                             <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}_{$pics_erp[i].size}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
                             <input type="checkbox" value="{$pics_erp[i].id}" id="{$pics_erp[i].id}_status_{$pics_erp[i].type}_{$pics_erp[i].size}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id == 0} disabled="disabled" {/if} />
                             {if $pics_erp[i].id != 0}
+                                <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_erp[i].full_path}');" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
+                                <!--
                                 <a  class="imagePreview"  href="{$pics_erp[i].full_path}" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
+                                -->
                             {else}
                                 <a href="#" class="disabled">{$pics_erp[i].label}</a>
                             {/if}
@@ -182,7 +197,10 @@ a.disabled
                         <input type="file" {if $pics_www[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
                         <input type="checkbox" value="{$pics_www[i].id}" id="{$pics_www[i].id}_status_{$pics_www[i].type}_{$pics_www[i].size}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id == 0} disabled="disabled" {/if} />
                         {if $pics_www[i].id != 0}
+                            <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_www[i].full_path}');" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
+                            <!--
                             <a  class="imagePreview"  href="{$pics_www[i].full_path}" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
+                            -->
                         {else}
                             <a href="#" class="disabled">{$pics_www[i].label}</a>
                         {/if}
