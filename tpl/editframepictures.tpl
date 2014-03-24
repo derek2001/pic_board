@@ -132,7 +132,10 @@ a.disabled
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
                         <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id == 0} disabled="disabled" {/if} />
                         {if $pics_raw[i].id != 0}
+                            <!--
                             <a href="#" class="disabled" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
+                            -->
+                            <a  class="imagePreview"  href="download.php?file={$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
                             <!--
                             <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a> -->
                         {else}

@@ -36,6 +36,16 @@ function array_group_by($arr, $key_selector) {
     return $result;
 }
 
+function remove_element_with_value($array, $key, $value)
+{
+    foreach($array as $subKey => $subArray){
+        if($subArray[$key] == $value){
+            unset($array[$subKey]);
+        }
+    }
+    return $array;
+}
+
 function uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_id, $imageType, $imageSize)
 {
     // make sure we have file_path
@@ -349,6 +359,46 @@ if (error != "")
     $pics_raw = $pics_grouped[PictureType::RAWPicture];
     $pics_erp = $pics_grouped[PictureType::ERPPicture];
     $pics_www = $pics_grouped[PictureType::WWWPicture];
+
+    if (count($pics_raw) > 1)
+    {
+        $pics_raw = remove_element_with_value($pics_raw, "id", 0);
+        $pics_raw = array_values($pics_raw);
+    }
+
+    $pics_erp_final = array();
+    if (count($pics_erp) > 3)
+    {
+        $pics_erp_by_size = array_group_by($pics_erp, function($i) {return $i[6];});
+        foreach ($pics_erp_by_size as $type)
+        {
+            $count = count($type);
+            if ($count > 1)
+            {
+                $type = remove_element_with_value($type, "id", 0);
+                $type = array_values($type);
+            }
+            $pics_erp_final = array_merge($pics_erp_final, $type);
+        }
+        $pics_erp = $pics_erp_final;
+    }
+
+    $pics_www_final = array();
+    if (count($pics_www) > 3)
+    {
+        $pics_www_by_size = array_group_by($pics_www, function($i) {return $i[6];});
+        foreach ($pics_www_by_size as $type)
+        {
+            $count = count($type);
+            if ($count > 1)
+            {
+                $type = remove_element_with_value($type, "id", 0);
+                $type = array_values($type);
+            }
+            $pics_www_final = array_merge($pics_www_final, $type);
+        }
+        $pics_www = $pics_www_final;
+    }
 
     include('Smarty.class.php');
     $smarty = new Smarty;
