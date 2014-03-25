@@ -27,7 +27,9 @@
           <tr><TD width="70%" align=left style="FONT: 20px arial,verdana,tahoma" nowrap><B>Stone Name:&nbsp;</B>{$data.unit[unt].slab.st_name}&nbsp;&nbsp;{$data.unit[unt].slab.sign} - {$data.unit[unt].slab.thickness}
                   {if strripos($data.unit[unt].slab.st_name, 'Blue Pearl') !== false}<br><span style="background-color: black; color:white; font-weight: bold">PAY ATTENTION TO DIRECTION OF THE FLAKES</span>{/if}</td>
                   {if $data.unit[unt].slab.sign != '' && $data.unit[unt].status.status < 5}
-                      {if $data.unit[unt].cnt_pic.cnt_raw<1 && ($data.unit[unt].cnt_pic.cnt_erp<3 || $data.unit[unt].cnt_pic.cnt_www<3) }
+                      {if $data.unit[unt].cnt_pic.cnt_raw<1 && $data.unit[unt].cnt_pic.cnt_erp<1 && $data.unit[unt].cnt_pic.cnt_www<3
+                        && $data.unit[unt].cnt_pic.cnt_jpg<1 && $data.unit[unt].cnt_pic.www_pc1==''
+                        && $data.unit[unt].cnt_pic.www_pc2=='' && $data.unit[unt].cnt_pic.www_pc3==''}
                           <td align=right valign="top" style="FONT: 35px arial,verdana,tahoma"  nowrap>
                                   <TABLE bgColor=#000000 width="30%">
                                       <TBODY><tr><td style="FONT: 35px arial,verdana,tahoma"><span style=" color: white; font-weight: bold">Picture</span></tr></td></TBODY>

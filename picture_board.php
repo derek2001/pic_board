@@ -122,7 +122,7 @@ if(isset($_GET['reset']) && isset($_GET['sf'])) {
 
 $loc = $_SESSION["user"]->getLocationProfile();
 
-$_SESSION["user"]->db->select("select sf.id,sf.id_slab,sf.id_frame,slab_board,sf.slab_nbr,f.sign
+$_SESSION["user"]->db->select("select sf.id,sf.id_slab,sf.id_frame,slab_board,sf.slab_nbr,f.sign, s.id_stone
 								from slab_frame sf
 								inner join frame f on f.id=sf.id_frame
 								inner join slab s on s.id=sf.id_slab
@@ -134,7 +134,7 @@ $_SESSION["user"]->db->select("select sf.id,sf.id_slab,sf.id_frame,slab_board,sf
 								and s.is_unknown = 0
 								and sf.id_frame NOT IN (1283, 1364, 1474, 627)
 								union
-								select sf.id,sf.id_slab,sf.id_frame,slab_board,sf.slab_nbr,f.sign
+								select sf.id,sf.id_slab,sf.id_frame,slab_board,sf.slab_nbr,f.sign, s.id_stone
 								from slab_frame sf
 								inner join frame f on f.id=sf.id_frame
 								inner join slab s on s.id=sf.id_slab
@@ -146,7 +146,7 @@ $_SESSION["user"]->db->select("select sf.id,sf.id_slab,sf.id_frame,slab_board,sf
 								and s.is_unknown = 0
 								and sf.id_frame NOT IN (1283, 1364, 1474, 627)
 								union
-								select null,sfd.id_slab,sfd.id_frame, null, 0, f.sign
+								select null,sfd.id_slab,sfd.id_frame, null, 0, f.sign, s.id_stone
 								from slab_frame_duplicate sfd
 								left join slab_frame sf on sfd.id_slab=sf.id_slab and sfd.id_frame=sf.id_frame
 								inner join frame f on f.id=sfd.id_frame
@@ -196,8 +196,9 @@ foreach($samples as $k=>$sample) {
         $id = $sample['id'];
     $_SESSION["user"]->db->select("select sl.id_slab_frame as id, sl.id_slab, sl.id_frame,
             (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_slab_frame = slc.id_slab_frame and sl.id_slab = slc.id_slab and sl.id_frame = slc.id_frame) cnt_raw,
-            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=1 and sl.id_slab_frame = sla.id_slab_frame and sl.id_slab = sla.id_slab and sl.id_frame = sla.id_frame) cnt_erp,
-            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=2 and sl.id_slab_frame = slb.id_slab_frame and sl.id_slab = slb.id_slab and sl.id_frame = slb.id_frame) cnt_www
+            (select count(sla.type) from [dbo].[stone_image] sla where sla.type=2 and sl.id_slab_frame = sla.id_slab_frame and sl.id_slab = sla.id_slab and sl.id_frame = sla.id_frame) cnt_erp,
+            (select count(slb.type) from [dbo].[stone_image] slb where slb.type=3 and sl.id_slab_frame = slb.id_slab_frame and sl.id_slab = slb.id_slab and sl.id_frame = slb.id_frame) cnt_www,
+            (select count(sld.type) from [dbo].[stone_image] sld where sld.type=1 and sl.id_slab_frame = sld.id_slab_frame and sl.id_slab = sld.id_slab and sl.id_frame = sld.id_frame) cnt_jpg
             from [dbo].[stone_image] sl
             where sl.id_slab_frame = ".$id."
             and sl.id_slab = ".$sample['id_slab']."
@@ -209,6 +210,17 @@ foreach($samples as $k=>$sample) {
     if($_SESSION["user"]->db->numrows() > 0)
     {
         $samples[$k]['pic_count'] = $cnt;
+    }
+
+    $_SESSION["user"]->db->select("select pict1, pict2, pict3 from [dbo].[stone_drawing] sd
+        where sd.id_stone = ".$sample['id_stone']."
+        and sd.id_slab = ".$sample['id_slab']."
+        ");
+
+    $www = $_SESSION["user"]->db->fetchArray();
+    if($_SESSION["user"]->db->numrows() > 0)
+    {
+        $samples[$k]['www_pic'] = $www;
     }
 }
 

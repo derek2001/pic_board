@@ -176,15 +176,27 @@ class PrintOrder
             foreach($ord_slab as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['status'] = $v;
 
          //picture status
-         $_SESSION['user']->db->select('select os.id_ord_unit, sf.id as id,
-         (select count(sia.type) from [stone_image] sia where sia.id_slab_frame = sf.id and sia.type = 0)as cnt_raw,
-         (select count(sib.type) from [stone_image] sib where sib.id_slab_frame = sf.id and sib.type = 1)as cnt_erp,
-         (select count(sic.type) from [stone_image] sic where sic.id_slab_frame = sf.id and sic.type = 2)as cnt_www
+         $_SESSION['user']->db->select('select os.id_ord_unit, sf.id_slab as id, s.id_stone,
+         (select count(sia.type) from [stone_image] sia
+			where sia.id_slab = sf.id_slab and sia.id_stone = s.id_stone and sia.type = 0)as cnt_raw,
+         (select count(sib.type) from [stone_image] sib
+			where sib.id_slab = sf.id_slab and sib.id_stone = s.id_stone and sib.type = 2)as cnt_erp,
+         (select count(sic.type) from [stone_image] sic
+			where sic.id_slab = sf.id_slab and sic.id_stone = s.id_stone and sic.type = 3)as cnt_www,
+	     (select count(sid.type) from [stone_image] sid
+			where sid.id_slab = sf.id_slab and sid.id_stone = s.id_stone and sid.type = 1)as cnt_jpg,
+		 (select pict1 from [stone_drawing] sda
+			where sda.id_slab = sf.id_slab and sda.id_stone = s.id_stone )as www_pc1,
+		 (select pict2 from [stone_drawing] sdb
+			where sdb.id_slab = sf.id_slab and sdb.id_stone = s.id_stone )as www_pc2,
+		 (select pict3 from [stone_drawing] sdc
+			where sdc.id_slab = sf.id_slab and sdc.id_stone = s.id_stone )as www_pc3
          from [ord_slab] os
          inner join [slab_frame] sf on sf.id = os.id_slab_frame
          inner join [stone_image] si on si.id_slab_frame = sf.id
+		 inner join [slab] s on s.id = sf.id_slab
          where os.id_ord_unit IN ('.$unit_list.')
-         group by sf.id, os.id_ord_unit');
+         group by sf.id_slab, os.id_ord_unit, s.id_stone');
          $cnt_raw = $_SESSION['user']->db->fetchAllArrays();
          if(is_array($cnt_raw))
             foreach($cnt_raw as $v) $data['unit'][$unit_pos[$v['id_ord_unit']]]['cnt_pic'] = $v;

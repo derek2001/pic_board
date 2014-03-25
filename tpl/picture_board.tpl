@@ -46,6 +46,12 @@
         <div style="float:right;"> &nbsp;&nbsp;&nbsp;&nbsp; </div>
         <div style="width:70px; background-color: #c2f19f; border: 1px solid black; float:right; font-size:11px">DONE</div>
         <div style="float:right; padding:0 5px 0 5px"> | </div>
+        <div style="width:70px; background-color: #c2f19f; color:white; border: 1px solid black; float:right; font-size:11px">WWW DONE</div>
+        <div style="float:right; padding:0 5px 0 5px"> | </div>
+        <div style="width:70px; background-color: orange; border: 1px solid black; float:right; font-size:11px">ERP DONE</div>
+        <div style="float:right; padding:0 5px 0 5px"> | </div>
+        <div style="width:70px; background-color: orange; color:white; border: 1px solid black; float:right; font-size:11px">JPEG DONE</div>
+        <div style="float:right; padding:0 5px 0 5px"> | </div>
         <div style="width:70px; background-color: #ffa399; color:white; border: 1px solid black; float:right; font-size:11px">RAW OK</div>
         <div style="float:right; padding:0 5px 0 5px"> | </div>
         <div style="width:70px; background-color: #ffa399; border: 1px solid black; float:right; font-size:11px">NOT DONE</div>
@@ -70,8 +76,14 @@
         <div class="test" id="{$data[f].id}_{$data[f].id_slab}_{$data[f].id_frame}"
              style="font-size: 11px; float:left; width:40px; margin: 3px;
                      padding: 1px; border: 1px solid black;
-             {if $data[f].pic_count.cnt_erp > 2 && $data[f].pic_count.cnt_www > 2}
+             {if $data[f].www_pic.pict1 != '' && $data[f].www_pic.pict2 != '' && $data[f].www_pic.pict3 != ''}
                  background-color: #c2f19f;
+             {elseif $data[f].pic_count.cnt_www > 2}
+                 background-color: #c2f19f; color: #ffffff;
+             {elseif $data[f].pic_count.cnt_erp > 0}
+                 background-color: orange;
+             {elseif $data[f].pic_count.cnt_jpg > 0}
+                 background-color: orange; color: #ffffff;
              {elseif $data[f].pic_count.cnt_raw > 0}
                  background-color: #ffa399; color: #ffffff;
              {else}
