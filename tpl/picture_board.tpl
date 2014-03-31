@@ -73,7 +73,7 @@
         && $data[f].history[0].id_frame.old_sign == '')}
     {else}
         {counter}
-        <div class="test" id="{$data[f].id}_{$data[f].id_slab}_{$data[f].id_frame}"
+        <div class="test" id="{$data[f].id}_{$data[f].id_slab}_{$data[f].id_frame}_{$data[f].id_stone}"
              style="font-size: 11px; float:left; width:40px; margin: 3px;
                      padding: 1px; border: 1px solid black;
              {if $data[f].www_pic.pict1 != '' && $data[f].www_pic.pict2 != '' && $data[f].www_pic.pict3 != ''}
