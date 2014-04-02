@@ -44,6 +44,8 @@
 <tr>
     <td align="right" width="55%">
         <div style="float:right;"> &nbsp;&nbsp;&nbsp;&nbsp; </div>
+        <div style="width:70px; background-color: #c2f19f; border: 1px solid black; float:right; font-size:11px">DONE?</div>
+        <div style="float:right; padding:0 5px 0 5px"> | </div>
         <div style="width:70px; background-color: #c2f19f; border: 1px solid black; float:right; font-size:11px">DONE</div>
         <div style="float:right; padding:0 5px 0 5px"> | </div>
         <div style="width:70px; background-color: #c2f19f; color:white; border: 1px solid black; float:right; font-size:11px">WWW DONE</div>
@@ -92,7 +94,7 @@
             text-align:center">
 
             <span class='sign'>
-                {$data[f].sign}
+                {$data[f].sign}{if $data[f].pic_count.status ==1 && $data[f].www_pic.pict1 != '' && $data[f].www_pic.pict2 != '' && $data[f].www_pic.pict3 != ''}?{/if}
             </span>
 
         </div>

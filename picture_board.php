@@ -198,7 +198,8 @@ foreach($samples as $k=>$sample) {
             (select count(slc.type) from [dbo].[stone_image] slc where slc.type=0 and sl.id_slab_frame = slc.id_slab_frame and sl.id_slab = slc.id_slab and sl.id_frame = slc.id_frame) cnt_raw,
             (select count(sla.type) from [dbo].[stone_image] sla where sla.type=2 and sl.id_slab_frame = sla.id_slab_frame and sl.id_slab = sla.id_slab and sl.id_frame = sla.id_frame) cnt_erp,
             (select count(slb.type) from [dbo].[stone_image] slb where slb.type=3 and sl.id_slab_frame = slb.id_slab_frame and sl.id_slab = slb.id_slab and sl.id_frame = slb.id_frame) cnt_www,
-            (select count(sld.type) from [dbo].[stone_image] sld where sld.type=1 and sl.id_slab_frame = sld.id_slab_frame and sl.id_slab = sld.id_slab and sl.id_frame = sld.id_frame) cnt_jpg
+            (select count(sld.type) from [dbo].[stone_image] sld where sld.type=1 and sl.id_slab_frame = sld.id_slab_frame and sl.id_slab = sld.id_slab and sl.id_frame = sld.id_frame) cnt_jpg,
+            (select distinct status from [dbo].[stone_image] sle where sl.id_slab_frame = sle.id_slab_frame and sl.id_slab = sle.id_slab and sl.id_frame = sle.id_frame) status
             from [dbo].[stone_image] sl
             where sl.id_slab_frame = ".$id."
             and sl.id_slab = ".$sample['id_slab']."

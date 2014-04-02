@@ -15,6 +15,14 @@ if(!$file){ // file does not exist
 
     ob_clean();
     flush();
-    readfile($filePath);
+
+    set_time_limit(0);
+    $file = @fopen($filePath,"rb");
+    while(!feof($file))
+    {
+        print(@fread($file, 1024*8));
+        ob_flush();
+        flush();
+    }
     exit;
 }

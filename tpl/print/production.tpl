@@ -99,7 +99,7 @@
 									 {/section}
 								  </tr>
 								  </table>
-                        
+                                         <hr>
                                                  
                         
         </TD></TR></table>
@@ -109,8 +109,12 @@
   <TR>
     <TD vAlign=middle align="center" width="47%">
 	  {if $data.unit[unt].slab.slab_sample == 1}
-	  <div style="border:10px dashed black;padding:2px; margin-top: 5px; font-size:54px; font-weight:bold; font-family:Verdana, Arial, Helvetica, sans-serif;">CUT SAMPLES</div>
+	  <div style="border:10px dashed black;padding:2px; margin-top: 5px; font-size:26px; font-weight:bold; font-family:Verdana, Arial, Helvetica, sans-serif;">CUT SAMPLES</div><hr>
 	  {/if}
+      <div vAlign="middle" align="center" width="47">
+          {"`$data.unit[unt].id`-1"|barcode}
+      </div>
+
       <!--<TABLE borderColor=#ffffff cellSpacing=2 cellPadding=1 width="100%" 
       border=0>
         <TBODY>
@@ -137,7 +141,7 @@
           <TD class="ptd12">{$data.order.company_name}</TD>
 		</TR>
         {/if}
-        </TBODY></TABLE>--><br /></TD>
+        </TBODY></TABLE>--></TD>
     <TD vAlign=top width="53%">
       <TABLE borderColor=#ffffff cellSpacing=2 cellPadding=1 width="100%" 
       border=1>

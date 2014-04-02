@@ -21,6 +21,7 @@
             }
         });
         // validates counts of checked images by type
+        /*
         $('#form_editframepictures').submit(function(e) {
             var erpFullCount = $('input[type="checkbox"][id*="status_1_0"]:checked').length;
             var erpMediumCount = $('input[type="checkbox"][id*="status_1_1"]:checked').length;
@@ -44,6 +45,7 @@
 
             return true;
         });
+        */
     });
 {/literal}
 </script>
@@ -105,21 +107,35 @@ a.disabled
 </tr>
 <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
     <td nowrap>Frame</td><td>{$stone.frame_sign}</td>
+</tr>
+{include file="search_footer.tpl"}
+
+<form id="form_editframepictures" enctype="multipart/form-data" method="POST" action="editframepictures.php?slab_frame_id={$slab_frame_id}&slab_id={$slab_id}&frame_id={$frame_id}&stone_id={$stone_id}">
+    <!-- used for post backs -->
+    <input type="hidden" name="slab_id" value="{$slab_id}" />
+    <input type="hidden" name="frame_id" value="{$frame_id}" />
+    <input type="hidden" name="slab_frame_id" value="{$slab_frame_id}" />
+    <input type="hidden" name="stone_id" value="{$stone_id}" />
+
+    <!-- needs more photos information -->
+    <!--
+    {assign var="table_headertitle" value="More pictures"}
+    {include file="search_header.tpl"}
+    <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
+        <td nowrap>Need to take more pictures if new slab</td>
+        <td>
+            <input type="checkbox" name="test_chb" {if $need_pics_status == 1} checked="checked" {/if} {if $need_more_pics_disabled == true} disabled="disabled" {/if}  />
+        </td>
     </tr>
     {include file="search_footer.tpl"}
+    -->
 
     <!-- picture information -->
-    <form id="form_editframepictures" enctype="multipart/form-data" method="POST" action="editframepictures.php">
-        <!-- used for post backs -->
-        <input type="hidden" name="slab_id" value="{$slab_id}" />
-        <input type="hidden" name="frame_id" value="{$frame_id}" />
-        <input type="hidden" name="slab_frame_id" value="{$slab_frame_id}" />
-
-        {assign var="table_headertitle" value="Picture information"}
-        {include file="search_header.tpl"}
-        <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
-            <td colspan="2">{if $error<>''}<br><b><font color="red">{$error}</font></b><br>{/if}</td>
-        </tr>
+    {assign var="table_headertitle" value="Picture information"}
+    {include file="search_header.tpl"}
+    <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
+        <td colspan="2">{if $error<>''}<br><b><font color="red">{$error}</font></b><br>{/if}</td>
+    </tr>
     <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
         <td nowrap>RAW picture:</td>
         <td>
@@ -130,7 +146,9 @@ a.disabled
                     <td width="100%">
                         <input type="hidden" name="id[]" value="{$pics_raw[i].id}" />
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
+                        <!--
                         <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id == 0} disabled="disabled" {/if} />
+                        -->
                         {if $pics_raw[i].id != 0}
                             <!--
                             <a href="#" class="disabled" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
@@ -156,16 +174,50 @@ a.disabled
         </td>
     </tr>
     <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
+        <td nowrap>JPEG picture:</td>
+        <td>
+            {if is_array($pics_jpeg) && count($pics_jpeg)>0}
+                <table width="100%">
+                    {section name=i loop=$pics_jpeg}
+                        <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
+                            <td width="100%">
+                                <input type="hidden" name="id[]" value="{$pics_jpeg[i].id}" />
+                                <input type="file" {if $pics_jpeg[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_jpeg[i].type}[]" id="{$pics_jpeg[i].id_slab_frame}_{$pics_jpeg[i].type}_{$pics_jpeg[i].size}" />
+                                <!--
+                                <input type="checkbox" value="{$pics_jpeg[i].id}" id="{$pics_jpeg[i].id}_status_{$pics_jpeg[i].type}_{$pics_jpeg[i].size}" {if $pics_jpeg[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_jpeg[i].id == 0} disabled="disabled" {/if} />
+                                -->
+                                {if $pics_jpeg[i].id != 0}
+                                    <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_jpeg[i].full_path}');" rel="{$pics_jpeg[i].full_path_thumbnail}">{$pics_jpeg[i].label}</a>
+                                {else}
+                                    <a href="#" class="disabled">{$pics_jpeg[i].label}</a>
+                                {/if}
+                            </td>
+                            <td>
+                                {if $pics_jpeg[i].id != 0}
+                                    <a class="delete" href="editframepictures.php?id={$pics_jpeg[i].id}&slab_frame_id={$pics_jpeg[i].id_slab_frame}&slab_id={$pics_jpeg[i].id_slab}&frame_id={$pics_jpeg[i].id_frame}&act=del">Delete</a>
+                                {else}
+                                    <a href="#" class="disabled">Delete</a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/section}
+                </table>
+            {/if}
+        </td>
+    </tr>
+    <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
         <td nowrap>ERP picture</td>
         <td>
             {if is_array($pics_erp) && count($pics_erp)>0}
-            <table>
+            <table width="100%">
             {section name=i loop=$pics_erp}
                     <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
-                        <td>
+                        <td width="100%">
                             <input type="hidden" name="id[]" value="{$pics_erp[i].id}" />
-                            <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}_{$pics_erp[i].size}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
+                            <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
+                            <!--
                             <input type="checkbox" value="{$pics_erp[i].id}" id="{$pics_erp[i].id}_status_{$pics_erp[i].type}_{$pics_erp[i].size}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id == 0} disabled="disabled" {/if} />
+                            -->
                             {if $pics_erp[i].id != 0}
                                 <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_erp[i].full_path}');" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
                                 <!--
@@ -198,7 +250,9 @@ a.disabled
                     <td>
                         <input type="hidden" name="id[]" value="{$pics_www[i].id}" />
                         <input type="file" {if $pics_www[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
+                        <!--
                         <input type="checkbox" value="{$pics_www[i].id}" id="{$pics_www[i].id}_status_{$pics_www[i].type}_{$pics_www[i].size}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id == 0} disabled="disabled" {/if} />
+                        -->
                         {if $pics_www[i].id != 0}
                             <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_www[i].full_path}');" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
                             <!--
@@ -219,6 +273,13 @@ a.disabled
             {/section}
             </table>
             {/if}
+        </td>
+    </tr>
+    <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
+        <td>&nbsp;</td>
+        <td>
+            <span>Need to take more pictures if new slab</span>&nbsp;&nbsp;
+            <input type="checkbox" name="need_pics_status" {if $need_pics_status_val == 1} checked="checked" {/if} {if $need_more_pics_disabled == true} disabled="disabled" {/if}  />
         </td>
     </tr>
     <tr >
