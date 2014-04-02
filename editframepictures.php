@@ -88,9 +88,18 @@ function uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_i
                     $label = "[label]";
             }
 
-            $thumb_nail_name = $fileName . "_THUMB";
-            $sql_insert = "INSERT INTO stone_image (id_slab_frame, id_frame, id_slab, id_stone, label, type, size, status, is_linked, full_path, full_path_thumbnail, create_date, update_date) VALUES
-                (".$slab_frame_id.", ".$frame_id.", ".$slab_id.", ".$stone_id.", '".$label."', ".$imageType.", ".$imageSize.",0, 0, '".$fileName."', '".$thumb_nail_name."', GETDATE(), GETDATE())";
+            // get status from db and insert the same for new picture
+            $sql_check_status = "SELECT si.status FROM stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id."GROUP BY si.status";
+            // query status check
+            $_SESSION["user"]->db->select($sql_check_status);
+            $rs = $_SESSION["user"]->db->fetchArray();
+
+            $need_pics_status_db = 0;
+            if ($_SESSION["user"]->db->numRows() > 0)
+                $need_pics_status_db = (int)$rs[0];
+
+            $sql_insert = "INSERT INTO stone_image (id_slab_frame, id_frame, id_slab, id_stone, label, type, size, status, full_path, create_date, update_date) VALUES
+                (".$slab_frame_id.", ".$frame_id.", ".$slab_id.", ".$stone_id.", '".$label."', ".$imageType.", ".$imageSize.", ". $need_pics_status_db .",'".$fileName."', GETDATE(), GETDATE())";
 
             $_SESSION["user"]->db->insert2($sql_insert);
             if ($_SESSION["user"]->db->numRows() > 0)
@@ -154,11 +163,6 @@ function checkFileError($error)
 
 function validateOnSubmit()
 {
-    // check names of all the pictures, if any of them is duplicate vs database return error - OK
-    // check names of all the pictures - store in array and find if there are any duplicates - OK
-    // check sizes of each file before submit
-    // check total size of the request and its content
-
     $error_duplicate = '';
     $error_size_limit = '';
 
@@ -315,18 +319,6 @@ function validateOnSubmit()
             $error_duplicate = $error_duplicate = $error_duplicate . ' File with name ' . $name . ' is duplicated.'. '<br />';
     }
 
-    /*
-    if(count(array_unique($file_names)) < count($file_names))
-    {
-        // array has duplicates
-        $error_duplicate = $error_duplicate = $error_duplicate . ' ';
-    }
-    else
-    {
-        // array does not have duplicates
-    }
-    */
-
     if (!empty($error_duplicate))
         throw new RuntimeException($error_duplicate);
     if (!empty($error_size_limit))
@@ -395,40 +387,6 @@ if (isset($_GET['act'])) {
 }
 // end - deleting
 
-// checking the count of status=1 (checked) items for each picture type
-// if (count($_POST['erp_picture_status']) > 3) {$error = "Number of checked erp images is greater than 3"; $flag = 1;}
-// if (count($_POST['www_picture_status']) > 3) {$error = "Number of checked www images is greater than 3"; $flag = 1;}
-
-//if (error != "")
-//{
-//    // update status
-//   if($flag != 1)
-//    {
-
-        /*
-        for ($i = 0; $i < count($_POST['id']); $i++)
-        {
-            $id = (int)$_POST['id'][$i];
-            if ($id != 0) {
-                if (in_array($id, $_POST['erp_picture_status']) || in_array($id, $_POST['www_picture_status']) || in_array($id, $_POST['raw_picture_status']))
-                {
-                    $sql_update = 'UPDATE [stone_image] SET status = 1, update_date = GETDATE() WHERE id ='.$id;
-                    if(!$_SESSION["user"]->db->update('[stone_image]', $id, $sql_update))
-                    {
-                        $error = "Saving data failed.";
-                    }
-                } else
-                {
-                    $sql_update = 'UPDATE stone_image SET status = 0, update_date = GETDATE() WHERE id ='.$id;
-                    if(!$_SESSION["user"]->db->update('stone_image', $id, $sql_update))
-                    {
-                        $error = "Saving data failed.";
-                    }
-                }
-            }
-        }*/
-//    }
-
 try
 {
     // check content length
@@ -437,7 +395,7 @@ try
         $totalBytes = (int)$_SERVER['CONTENT_LENGTH'];
         $totalMBytes = ($totalBytes/1024)/1024;
 
-        throw new RuntimeException(sprintf('The server was unable to handle that much data (%s bytes) due to its current configuration %s Please upload only one file each time.',  round($totalMBytes), '<br />'));
+        throw new RuntimeException(sprintf('The server was unable to handle that much data (%s mbytes) %s due to its current configuration. Please upload images separately',  round($totalMBytes), '<br />'));
     }
 
     validateOnSubmit();
@@ -445,29 +403,38 @@ try
     // first need to check the submit form methof
     if ($_SERVER['REQUEST_METHOD'] === 'POST')
     {
-        // update status if changed (onlyt when post)
-        $need_pics_status = $_POST['need_pics_status'];
-        $need_pics_status_db = 0;
+        // update status if changed (onlyt when post and numb of pics > MAX_NUM_PICTURES)
+        $sql_pics_count = "SELECT COUNT(si.id) FROM stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id;
 
-        $sql_check_status = "SELECT si.status FROM stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id."GROUP BY si.status";
-        // query status check
-        $_SESSION["user"]->db->select($sql_check_status);
-        $rs = $_SESSION["user"]->db->fetchArray();
-        $need_pics_status_db = (int)$rs[0];
+        $_SESSION["user"]->db->select($sql_pics_count);
+        $pics_count = $_SESSION["user"]->db->fetchArray();
+        $pics_count = (int)$pics_count[0];
 
-        $need_pics_status_val = 0;
-        if (isset($_POST['need_pics_status']))
-            $need_pics_status_val = 1;
-
-        if (($need_pics_status_val == 1 && $need_pics_status_db == 0)
-            ||($need_pics_status_val == 0 && $need_pics_status_db == 1))
+        if ($pics_count >= MAX_NUM_PICTURES)
         {
-            // needs update
-            $sql_update = 'UPDATE stone_image SET status = '.$need_pics_status_val.', update_date = GETDATE() WHERE id_slab ='.$slab_id.' AND id_stone='.$stone_id;
-            if(!$_SESSION["user"]->db->update('stone_image', 0, $sql_update))
+            $need_pics_status = $_POST['need_pics_status'];
+            $need_pics_status_db = 0;
+
+            $sql_check_status = "SELECT si.status FROM stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id."GROUP BY si.status";
+            // query status check
+            $_SESSION["user"]->db->select($sql_check_status);
+            $rs = $_SESSION["user"]->db->fetchArray();
+            $need_pics_status_db = (int)$rs[0];
+
+            $need_pics_status_val = 0;
+            if (isset($_POST['need_pics_status']))
+                $need_pics_status_val = 1;
+
+            if (($need_pics_status_val == 1 && $need_pics_status_db == 0)
+                ||($need_pics_status_val == 0 && $need_pics_status_db == 1))
             {
-                $error = "Saving data failed.";
-                throw new RuntimeException($error);
+                // needs update
+                $sql_update = 'UPDATE stone_image SET status = '.$need_pics_status_val.', update_date = GETDATE() WHERE id_slab ='.$slab_id.' AND id_stone='.$stone_id;
+                if(!$_SESSION["user"]->db->update('stone_image', 0, $sql_update))
+                {
+                    $error = "Saving data failed.";
+                    throw new RuntimeException($error);
+                }
             }
         }
     }
@@ -586,15 +553,15 @@ try
     $_SESSION["user"]->db->select($sql_stone);
     $stone = $_SESSION["user"]->db->fetchArray();
 
-    $sql_pictures = "SELECT si.id, si.id_slab_frame, si.id_frame, si.id_slab, si.label, si.type, si.size, si.status, si.is_linked, '" .UPLOAD_PATH. "' + si.full_path as 'full_path', '"
-        . UPLOAD_PATH. "' + si.full_path_thumbnail AS 'full_path_thumbnail' from stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Full View' as label, 3 as type, 0 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Medium View' as label, 3 as type, 1 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'Macro View' as label, 3 as type, 2 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
+    $sql_pictures = "SELECT si.id, si.id_slab_frame, si.id_frame, si.id_slab, si.id_stone, si.label, si.type, si.size, si.status, '" .UPLOAD_PATH. "' + si.full_path as 'full_path'"
+        . " from stone_image si WHERE id_slab_frame=".$slab_frame_id." and id_frame = ".$frame_id." and id_slab = ".$slab_id
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'Full View' as label, 3 as type, 0 as size, 0 as status, '' as full_path"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'Medium View' as label, 3 as type, 1 as size, 0 as status, '' as full_path"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'Macro View' as label, 3 as type, 2 as size, 0 as status, '' as full_path"
 
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'ERP' as label, 2 as type, 5 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'JPEG' as label, 1 as type, 4 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
-        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 'RAW' as label, 0 as type, 3 as size, 0 as status, 0 as is_linked, '' as full_path, '' as full_path_thumbnail"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'ERP' as label, 2 as type, 5 as size, 0 as status, '' as full_path"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'JPEG' as label, 1 as type, 4 as size, 0 as status, '' as full_path"
+        . " UNION SELECT 0 as id, 0 as id_slab_frame, 0 as id_frame, 0 as id_slab, 0 as id_stone, 'RAW' as label, 0 as type, 3 as size, 0 as status, '' as full_path"
         . " ORDER BY id_slab_frame, si.id_frame, size"
     ;
 
@@ -603,7 +570,7 @@ try
     $pictures = $_SESSION["user"]->db->fetchAllArrays();
 
     // grouped by type
-    $pics_grouped = array_group_by($pictures, function($i) {return $i[5];});
+    $pics_grouped = array_group_by($pictures, function($i) {return $i[6];});
     $pics_raw = $pics_grouped[PictureType::RAWPicture];
     $pics_jpeg = $pics_grouped[PictureType::JPEGPicture];
     $pics_erp = $pics_grouped[PictureType::ERPPicture];
@@ -632,7 +599,7 @@ try
     $pics_erp_final = array();
     if (count($pics_erp) > 3)
     {
-        $pics_erp_by_size = array_group_by($pics_erp, function($i) {return $i[6];});
+        $pics_erp_by_size = array_group_by($pics_erp, function($i) {return $i[7];});
         foreach ($pics_erp_by_size as $type)
         {
             $count = count($type);
@@ -649,7 +616,7 @@ try
     $pics_www_final = array();
     if (count($pics_www) > 3)
     {
-        $pics_www_by_size = array_group_by($pics_www, function($i) {return $i[6];});
+        $pics_www_by_size = array_group_by($pics_www, function($i) {return $i[7];});
         foreach ($pics_www_by_size as $type)
         {
             $count = count($type);
@@ -676,29 +643,6 @@ try
 
     // get value of needs_more_pics (0 or 1)
     $need_pics_status_val = $pictures[count($pictures) - 1]["status"];
-
-
-    /*
-    if (!$need_more_pics_disabled)
-    {
-        // when enabled display status
-        $need_pics_status = $pictures[0]["status"];
-    }
-    else
-    {
-        // then disabled check the 0 value and update if necessary
-        $need_pics_status = $pics_raw[0]["status"];
-        if ($need_pics_status == 1)
-        {
-            $sql_update = 'UPDATE stone_image SET status = 0, update_date = GETDATE() WHERE id_slab ='.$slab_id.' AND id_stone='.$stone_id;
-            if(!$_SESSION["user"]->db->update('stone_image', 0, $sql_update))
-            {
-                $error = "Saving data failed.";
-            }
-
-        }
-    }
-    */
 
     include('Smarty.class.php');
     $smarty = new Smarty;

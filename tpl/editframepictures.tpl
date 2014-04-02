@@ -1,7 +1,6 @@
 {include file="header_no_user.tpl"}
 <script type="text/javascript" src="js/design.js"></script>
 <script type="text/javascript" src="js/ajax/jquery-1.6.2.min.js"></script>
-<script type="text/javascript" src="__STONE_PICS/main.js"></script>
 <script type="text/javascript">
 {literal}
     //ADDED START
@@ -150,19 +149,14 @@ a.disabled
                         <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id == 0} disabled="disabled" {/if} />
                         -->
                         {if $pics_raw[i].id != 0}
-                            <!--
-                            <a href="#" class="disabled" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
-                            -->
-                            <a  class="imagePreview"  href="download.php?file={$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a>
-                            <!--
-                            <a  class="imagePreview"  href="{$pics_raw[i].full_path}" rel="{$pics_raw[i].full_path_thumbnail}">{$pics_raw[i].label}</a> -->
+                            <a  class="imagePreview"  href="download.php?file={$pics_raw[i].full_path}">{$pics_raw[i].label}</a>
                         {else}
                             <a href="#" class="disabled">{$pics_raw[i].label}</a>
                         {/if}
                     </td>
                     <td>
                         {if $pics_raw[i].id != 0}
-                            <a class="delete" href="editframepictures.php?id={$pics_raw[i].id}&slab_frame_id={$pics_raw[i].id_slab_frame}&slab_id={$pics_raw[i].id_slab}&frame_id={$pics_raw[i].id_frame}&act=del">Delete</a>
+                            <a class="delete" href="editframepictures.php?id={$pics_raw[i].id}&slab_frame_id={$pics_raw[i].id_slab_frame}&slab_id={$pics_raw[i].id_slab}&frame_id={$pics_raw[i].id_frame}&stone_id={$pics_raw[i].id_stone}&act=del">Delete</a>
                         {else}
                             <a href="#" class="disabled">Delete</a>
                         {/if}
@@ -187,14 +181,14 @@ a.disabled
                                 <input type="checkbox" value="{$pics_jpeg[i].id}" id="{$pics_jpeg[i].id}_status_{$pics_jpeg[i].type}_{$pics_jpeg[i].size}" {if $pics_jpeg[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_jpeg[i].id == 0} disabled="disabled" {/if} />
                                 -->
                                 {if $pics_jpeg[i].id != 0}
-                                    <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_jpeg[i].full_path}');" rel="{$pics_jpeg[i].full_path_thumbnail}">{$pics_jpeg[i].label}</a>
+                                    <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_jpeg[i].full_path}');">{$pics_jpeg[i].label}</a>
                                 {else}
                                     <a href="#" class="disabled">{$pics_jpeg[i].label}</a>
                                 {/if}
                             </td>
                             <td>
                                 {if $pics_jpeg[i].id != 0}
-                                    <a class="delete" href="editframepictures.php?id={$pics_jpeg[i].id}&slab_frame_id={$pics_jpeg[i].id_slab_frame}&slab_id={$pics_jpeg[i].id_slab}&frame_id={$pics_jpeg[i].id_frame}&act=del">Delete</a>
+                                    <a class="delete" href="editframepictures.php?id={$pics_jpeg[i].id}&slab_frame_id={$pics_jpeg[i].id_slab_frame}&slab_id={$pics_jpeg[i].id_slab}&frame_id={$pics_jpeg[i].id_frame}&stone_id={$pics_jpeg[i].id_stone}&act=del">Delete</a>
                                 {else}
                                     <a href="#" class="disabled">Delete</a>
                                 {/if}
@@ -219,17 +213,14 @@ a.disabled
                             <input type="checkbox" value="{$pics_erp[i].id}" id="{$pics_erp[i].id}_status_{$pics_erp[i].type}_{$pics_erp[i].size}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id == 0} disabled="disabled" {/if} />
                             -->
                             {if $pics_erp[i].id != 0}
-                                <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_erp[i].full_path}');" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
-                                <!--
-                                <a  class="imagePreview"  href="{$pics_erp[i].full_path}" rel="{$pics_erp[i].full_path_thumbnail}">{$pics_erp[i].label}</a>
-                                -->
+                                <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_erp[i].full_path}');">{$pics_erp[i].label}</a>
                             {else}
                                 <a href="#" class="disabled">{$pics_erp[i].label}</a>
                             {/if}
                         </td>
                         <td>
                             {if $pics_erp[i].id != 0}
-                                <a class="delete" href="editframepictures.php?id={$pics_erp[i].id}&slab_frame_id={$pics_erp[i].id_slab_frame}&slab_id={$pics_erp[i].id_slab}&frame_id={$pics_erp[i].id_frame}&act=del">Delete</a>
+                                <a class="delete" href="editframepictures.php?id={$pics_erp[i].id}&slab_frame_id={$pics_erp[i].id_slab_frame}&slab_id={$pics_erp[i].id_slab}&frame_id={$pics_erp[i].id_frame}&stone_id={$pics_erp[i].id_stone}&act=del">Delete</a>
                             {else}
                                 <a href="#" class="disabled">Delete</a>
                             {/if}
@@ -244,27 +235,24 @@ a.disabled
         <td nowrap>WWW picture</td>
         <td>
             {if is_array($pics_www) && count($pics_www)>0}
-            <table>
+            <table width="100%">
             {section name=i loop=$pics_www}
                 <tr class="cell_reccolor_blue_01{cycle name="parity" values="a,b"}">
-                    <td>
+                    <td width="100%">
                         <input type="hidden" name="id[]" value="{$pics_www[i].id}" />
                         <input type="file" {if $pics_www[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
                         <!--
                         <input type="checkbox" value="{$pics_www[i].id}" id="{$pics_www[i].id}_status_{$pics_www[i].type}_{$pics_www[i].size}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id == 0} disabled="disabled" {/if} />
                         -->
                         {if $pics_www[i].id != 0}
-                            <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_www[i].full_path}');" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
-                            <!--
-                            <a  class="imagePreview"  href="{$pics_www[i].full_path}" rel="{$pics_www[i].full_path_thumbnail}">{$pics_www[i].label}</a>
-                            -->
+                            <a  class="imagePreview" href="#" onclick="openPopupImage('{$pics_www[i].full_path}');">{$pics_www[i].label}</a>
                         {else}
                             <a href="#" class="disabled">{$pics_www[i].label}</a>
                         {/if}
                     </td>
                     <td>
                         {if $pics_www[i].id != 0}
-                            <a class="delete" href="editframepictures.php?id={$pics_www[i].id}&slab_frame_id={$pics_www[i].id_slab_frame}&slab_id={$pics_www[i].id_slab}&frame_id={$pics_www[i].id_frame}&act=del">Delete</a>
+                            <a class="delete" href="editframepictures.php?id={$pics_www[i].id}&slab_frame_id={$pics_www[i].id_slab_frame}&slab_id={$pics_www[i].id_slab}&frame_id={$pics_www[i].id_frame}&stone_id={$pics_www[i].id_stone}&act=del">Delete</a>
                         {else}
                             <a href="#" class="disabled">Delete</a>
                         {/if}
@@ -279,7 +267,7 @@ a.disabled
         <td>&nbsp;</td>
         <td>
             <span>Need to take more pictures if new slab</span>&nbsp;&nbsp;
-            <input type="checkbox" name="need_pics_status" {if $need_pics_status_val == 1} checked="checked" {/if} {if $need_more_pics_disabled == true} disabled="disabled" {/if}  />
+            <input type="checkbox" name="need_pics_status" {if $need_pics_status_val == 1} value="1" checked="checked" {/if} {if $need_more_pics_disabled == true} disabled="disabled"  {/if}  />
         </td>
     </tr>
     <tr >
