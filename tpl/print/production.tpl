@@ -106,12 +106,9 @@
   <TR><TD colSpan=2 height="1" valign="top" width="100%" bgcolor="#7f7f7f"></TD></TR>
   <TR>
     <TD vAlign=middle align="center" width="47%">
-	  {if $data.unit[unt].slab.slab_sample == 1}
-	  <div style="border:10px dashed black;padding:2px; margin-top: 5px; font-size:26px; font-weight:bold; font-family:Verdana, Arial, Helvetica, sans-serif;">CUT SAMPLES</div><hr>
-	  {/if}
-      <div vAlign="middle" align="center" width="47">
-          {"`$data.unit[unt].id`-1"|barcode}
-      </div>
+        {if $data.unit[unt].slab.slab_sample == 1}
+            <div style="border:10px dashed black;padding:2px; margin-top: 5px; font-size:54px; font-weight:bold; font-family:Verdana, Arial, Helvetica, sans-serif;">CUT SAMPLES</div>
+        {/if}
 
       <!--<TABLE borderColor=#ffffff cellSpacing=2 cellPadding=1 width="100%" 
       border=0>
