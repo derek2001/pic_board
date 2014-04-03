@@ -190,7 +190,9 @@ class PrintOrder
 		 (select pict2 from [stone_drawing] sdb
 			where sdb.id_slab = sf.id_slab and sdb.id_stone = s.id_stone )as www_pc2,
 		 (select pict3 from [stone_drawing] sdc
-			where sdc.id_slab = sf.id_slab and sdc.id_stone = s.id_stone )as www_pc3
+			where sdc.id_slab = sf.id_slab and sdc.id_stone = s.id_stone )as www_pc3,
+		 (select distinct sie.status from [stone_image] sie
+			where sie.id_slab = sf.id_slab and sie.id_stone = s.id_stone )as status
          from [ord_slab] os
          inner join [slab_frame] sf on sf.id = os.id_slab_frame
          inner join [stone_image] si on si.id_slab_frame = sf.id
