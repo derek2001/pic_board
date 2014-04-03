@@ -1,6 +1,6 @@
 <?php
 include_once("config.php");
-DEFINE ('UPLOAD_PATH', '__STONE_PICS/');
+DEFINE ('UPLOAD_PATH', 'upload/stone/');
 DEFINE ('MAX_UPLOAD_SIZE', 31457280);
 DEFINE ('MAX_NUM_PICTURES', 6);
 // DEFINE ('MAX_UPLOAD_SIZE', 15728640);
@@ -117,7 +117,7 @@ function uploadImage($fileName, $tmpFilePath, $slab_frame_id, $slab_id, $frame_i
     }
 }
 
-/*
+
 function randString($length, $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
 {
     $str = '';
@@ -126,7 +126,7 @@ function randString($length, $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno
         $str .= $charset[mt_rand(0, $count-1)];
     }
     return $str;
-}*/
+}
 
 function isImageNameValid($imageName)
 {
