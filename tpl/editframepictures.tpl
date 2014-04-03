@@ -4,7 +4,7 @@
 <script type="text/javascript">
 {literal}
     //ADDED START
-    window.onunload = refreshParent;
+    //window.onunload = refreshParent;
     function refreshParent() {
         window.opener.location.reload();
     }
@@ -145,6 +145,10 @@ a.disabled
                     <td width="100%">
                         <input type="hidden" name="id[]" value="{$pics_raw[i].id}" />
                         <input type="file" {if $pics_raw[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_raw[i].type}[]" id="{$pics_raw[i].id_slab_frame}_{$pics_raw[i].type}_{$pics_raw[i].size}" />
+
+                        &nbsp;
+                        <input type="checkbox" disabled="disabled" {if $pics_raw[i].id != 0} checked="checked" {/if} />
+                        &nbsp;
                         <!--
                         <input type="checkbox" value="{$pics_raw[i].id}" id="{$pics_raw[i].id}_status_{$pics_raw[i].type}_{$pics_raw[i].size}" {if $pics_raw[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_raw[i].id == 0} disabled="disabled" {/if} />
                         -->
@@ -177,6 +181,9 @@ a.disabled
                             <td width="100%">
                                 <input type="hidden" name="id[]" value="{$pics_jpeg[i].id}" />
                                 <input type="file" {if $pics_jpeg[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_jpeg[i].type}[]" id="{$pics_jpeg[i].id_slab_frame}_{$pics_jpeg[i].type}_{$pics_jpeg[i].size}" />
+                                &nbsp;
+                                <input type="checkbox" disabled="disabled" {if $pics_jpeg[i].id != 0} checked="checked" {/if} />
+                                &nbsp;
                                 <!--
                                 <input type="checkbox" value="{$pics_jpeg[i].id}" id="{$pics_jpeg[i].id}_status_{$pics_jpeg[i].type}_{$pics_jpeg[i].size}" {if $pics_jpeg[i].status == 1} checked="checked" {/if} name="raw_picture_status[]" {if $pics_jpeg[i].id == 0} disabled="disabled" {/if} />
                                 -->
@@ -209,6 +216,9 @@ a.disabled
                         <td width="100%">
                             <input type="hidden" name="id[]" value="{$pics_erp[i].id}" />
                             <input type="file" {if $pics_erp[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_erp[i].type}[]"  id="{$pics_erp[i].id_slab_frame}_{$pics_erp[i].type}_{$pics_erp[i].size}" />
+                            &nbsp;
+                            <input type="checkbox" disabled="disabled" {if $pics_erp[i].id != 0} checked="checked" {/if} />
+                            &nbsp;
                             <!--
                             <input type="checkbox" value="{$pics_erp[i].id}" id="{$pics_erp[i].id}_status_{$pics_erp[i].type}_{$pics_erp[i].size}" {if $pics_erp[i].status == 1} checked="checked" {/if} name="erp_picture_status[]" {if $pics_erp[i].id == 0} disabled="disabled" {/if} />
                             -->
@@ -241,6 +251,9 @@ a.disabled
                     <td width="100%">
                         <input type="hidden" name="id[]" value="{$pics_www[i].id}" />
                         <input type="file" {if $pics_www[i].id != 0} disabled="disabled" {/if} name="picture_to_upload_{$pics_www[i].type}_{$pics_www[i].size}[]" id="{$pics_www[i].id_slab_frame}_{$pics_www[i].type}_{$pics_www[i].size}" />
+                        &nbsp;
+                        <input type="checkbox" disabled="disabled" {if $pics_www[i].id != 0} checked="checked" {/if} />
+                        &nbsp;
                         <!--
                         <input type="checkbox" value="{$pics_www[i].id}" id="{$pics_www[i].id}_status_{$pics_www[i].type}_{$pics_www[i].size}" {if $pics_www[i].status == 1} checked="checked" {/if} name="www_picture_status[]" {if $pics_www[i].id == 0} disabled="disabled" {/if} />
                         -->
@@ -273,7 +286,7 @@ a.disabled
     <tr >
         <td colspan="2">
             <input type="button" class="BUTTON_CANCEL" value="Cancel" onclick="window.close()"/>&nbsp;&nbsp;
-            <input type="submit" class="BUTTON_OK" value="Save" />
+            <input type="submit" class="BUTTON_OK" value="Save" onclick="refreshParent()"/>
         </td>
     </tr>
     {include file="search_footer.tpl"}
