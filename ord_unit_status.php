@@ -41,9 +41,9 @@ function initUnitStatus($orders){
                  VALUES
                    (".$order['id']."
                    ,".$unit['id']."
-                   ,0 ,null ,null ,null
-                   ,0 ,null ,null ,null
-                   ,0 ,null ,null ,null
+                   ,0 ,0 ,null ,null
+                   ,0 ,0 ,null ,null
+                   ,0 ,0 ,null ,null,1
                    )";
 
                 $_SESSION["user"]->db->insert($insert);
@@ -76,30 +76,31 @@ if ($_POST['submit'] == 'Search') {
 }
 $query = "";
 $proj = "";
+$status = " and u_status = 1 ";
 if (isset ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH'])) {
     if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword'] != '') {
         $query .= " AND (";
         if (is_numeric($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']))
         {
             $query .= " id_ord_unit='".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."' or ";
-            $proj .= "or id = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."'";
+            $query .= "id_order = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."' or ";
         }
-        $query .= " c_operator like '%"
-            .$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."%' or p_operator like '%"
-            .$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."%' or i_operator like '%"
+        $query .= " c_name like '%"
+            .$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."%' or p_name like '%"
+            .$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."%' or i_name like '%"
             .$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['keyword']."%' )";
     }
 
     if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['ord'] != '')
-        $proj .= " AND id = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['ord']."'";
+        $query .= " AND id_order = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['ord']."'";
 
     if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['unt'] != '')
         $query .= " AND id_ord_unit = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['unt']."'";
 
     if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator'] != '')
-        $query .= " AND (c_operator = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."'
-            or p_operator = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."'
-            or i_operator = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."' )";
+        $query .= " AND (c_name = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."'
+            or p_name = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."'
+            or i_name = '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['operator']."' )";
 
     if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['cut_from'] != '')
         $query .= " AND c_start_time >= '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['cut_from']."'";
@@ -117,14 +118,19 @@ if (isset ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH'])) {
         $query .= " AND i_fin_time <= '".$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['ins_to']."'";
     $_SESSION['ORD_UNIT_STATUS_SESSION']['CNT'] = '';
 
+    if ($_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']['in_obsolete'] != '')
+        $status = " and u_status in (0,1)";
 }
 
 $script='ord_unit_status';
 $page = 10;
 function getCnt($loc, $proj, $query){
-    $_SESSION["user"]->db->select("select count(*) as cnt from [order] o where o.status in (3,4) and o.id_location = ".$loc['id']."$proj");
+    $_SESSION["user"]->db->select("select count(*) as cnt from dbo.unit_status_select()
+        where status = 4
+        $query
+        ");
     $cnt = $_SESSION["user"]->db->fetchArray();
-    $_SESSION["user"]->db->select("select * from [order] o where o.status in (3,4) and o.id_location = ".$loc['id']."  $proj");
+    /*$_SESSION["user"]->db->select("select * from [order] o where o.status in (3,4) and o.id_location = ".$loc['id']."  $query");
     $data = $_SESSION['user']->db->fetchAllArrays();
     $num=1;
     $flag=0;
@@ -135,48 +141,51 @@ function getCnt($loc, $proj, $query){
             where ous.id_order = ".$order['id']."
             and ous.i_status < 2
             ";
-}
-else
-{
-    $rows = "select * from [ord_unit_status] ous
-            where ous.id_order = ".$order['id']."
-            $query
-            ";
-    $flag=1;
-}
-$_SESSION["user"]->db->select($rows);
-$unit = $_SESSION["user"]->db->fetchAllArrays();
-if($_SESSION["user"]->db->numrows() > 0)
-{
-    $orders[$k]['ord_unit'] = $unit;
-    $num++;
-}
-}
-if($flag==1)
-    $cnt = $num;
+        }
+        else
+        {
+            $rows = "select * from [ord_unit_status] ous
+                    where ous.id_order = ".$order['id']."
+                    $query
+                    ";
+            $flag=1;
+        }
+        $_SESSION["user"]->db->select($rows);
+        $unit = $_SESSION["user"]->db->fetchAllArrays();
+        if($_SESSION["user"]->db->numrows() > 0)
+        {
+            $orders[$k]['ord_unit'] = $unit;
+            $num++;
+        }
+    }
+    if($flag==1)
+        $cnt = $num;*/
 
 return $cnt;
 }
+$select = "select * from [order] where status = 4 ";
+$_SESSION["user"]->db->select($select);
+$order_init = $_SESSION["user"]->db->fetchAllArrays();
+initUnitStatus($order_init);
 
-$data = "and status in (3,4)
-  and id_location = ".$loc['id']."
-  $proj
+$data = "and status = 4
+  $query
+  $status
   ";
-
+$_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER'] = ' c_status desc, p_status desc, i_status desc, id_order asc, id_ord_unit ';
+$_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER_DIR'] = 'ASC';
 $cfgArr = array(
     'table'=>(isset($_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER']) && $_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER']!='')?$_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER']:'id',
     'dir'=>$_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER_DIR'],
     'col_name' =>"*"
 );
-$sql = page_query_cur($data,'[order]',$cfgArr,isset($_GET['pg'])?($_GET['pg'])*10:null,$page);
+$sql = page_query_cur($data,'dbo.unit_status_select()',$cfgArr,isset($_GET['pg'])?($_GET['pg'])*10:null,$page);
 $_SESSION["user"]->db->select($sql);
 $orders = $_SESSION["user"]->db->fetchAllArrays();
-/*$_SESSION["user"]->db->select($sql);
-$orders = $_SESSION["user"]->db->fetchAllArrays();*/
-initUnitStatus($orders);
+
 
 //select all unit not done from table
-$num=0;
+/*$num=0;
 $flag=0;
 foreach($orders as $k=>$order) {
     if(strcmp($query, ' AND ') == 0 || $query=='')
@@ -201,7 +210,7 @@ foreach($orders as $k=>$order) {
         $orders[$k]['ord_unit'] = $unit;
         $num++;
     }
-}
+}*/
 $cnt = getCnt($loc, $proj, $query);
 if (isset($_GET['pg'])) $arrow = page_selector($page, $_GET['pg'], $cnt['cnt'], $script);
 else $arrow = page_selector($page, '', $cnt['cnt'], $script);
@@ -218,12 +227,12 @@ $smarty = new Smarty;
     $smarty->assign('menulink',$_SESSION['user']->getMenuLink());
 //----------------------------------------------------------------------
 $insert = $_SESSION["user"]->getPrivilege('insert');
-if ($insert) $smarty->assign('submenu',array(0=>array('name'=>'New unit status','link'=>'unit_statusedit.php')));
+if ($insert) $smarty->assign('submenu',array(0=>array('name'=>'Unit Status Monitor','link'=>'ord_unit_monitor.php')));
 
 $smarty->assign('cnt',$cnt);
 $smarty->assign('paging',$arrow);
 
-$smarty->assign('search',$search);
+$smarty->assign('search',$_SESSION['ORD_UNIT_STATUS_SESSION']['SEARCH']);
 $smarty->assign('error',$error);
 $smarty->assign('alastid',time());
 $smarty->assign('id',$_GET['id']);

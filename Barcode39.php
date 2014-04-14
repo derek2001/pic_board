@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Barcode39 - Code 39 Barcode Image Generator
+ */
 final class Barcode39 {
 	/**
 	 * Code 39 format 2 specifications

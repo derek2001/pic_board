@@ -1,6 +1,7 @@
 {include file="header.tpl"}
 <script type="text/javascript" src="js/design.js"></script>
 <script type="text/javascript" src="js/ajax/jquery-1.6.2.min.js"></script>
+<meta http-equiv="refresh" content="1000">
 {dhtml_calendar_init src='js/jscalendar/calendar.js' setup_src='js/jscalendar/calendar-setup.js' lang='js/jscalendar/lang/calendar-en.js' css='js/jscalendar/calendar-system.css'}
 {if $error<>''}<br><b><font color="red">{$error}</font></b>{/if}
 {literal}
@@ -17,6 +18,7 @@
         search.ord.value = '';
         search.unt.value = '';
         search.operator.value = '';
+        search.in_obsolete.checked = false;
     }
 </script>
 {/literal}
@@ -40,7 +42,6 @@
                         <input type="text" name="ord" value="{$search.ord}" size="30">
                     </td>
                 </tr>
-
 
                 <tr class="cell_reccolor_blue_01a">
                     <td nowrap>Unit Number:</td>
@@ -111,6 +112,12 @@
                         </table>
                     </td>
                 </tr>
+                <tr class="cell_reccolor_blue_01b">
+                    <td nowrap>Include obsolete data:</td>
+                    <td>
+                        <input type="checkbox" name="in_obsolete" value="1" {if $search.in_obsolete}checked="checked"{/if}> Yes
+                    </td>
+                </tr>
 
                 <tr class="cell_reccolor_grey_01b">
                     <td><input type="button" value="Clear" class="BUTTON_CANCEL" onclick="clearForm();"></td>
@@ -148,15 +155,16 @@
 {include file="table_header.tpl"}
 {if count($order)>0}
     <tr class="cell_reccolor_neutral_01">
-        <td width="5%" >{$img.id}<a href="ord_unit_status.php?ord=id">OrderList</a>{$img.id}</td>
-        <td width="5%" >{$img.id}<a href="ord_unit_status.php?ord=id">UnitList</a>{$img.id}</td>
-        <td width="30%" >{$img.name}<a href="ord_unit_status.php?ord=name">Template</a>{$img.name}</td>
-        <td width="30%" >{$img.value}<a href="ord_unit_status.php?ord=value">Production</a>{$img.value}</td>
-        <td width="30%">{$img.value}<a href="ord_unit_status.php?ord=value">Installation</a>{$img.value}</td>
+        <td width="5%" >{$img.id}OrderList</td>
+        <td width="5%" >{$img.id}UnitList</td>
+        <td width="28%" >{$img.name}Template</td>
+        <td width="28%" >{$img.value}Production</td>
+        <td width="28%">{$img.value}Installation</td>
+        <td width="6%">{$img.value}Status</td>
     </tr>
-    {assign var="columns" value="0,1,2,3,4"}
+    {assign var="columns" value="0,1,2,3,4,5"}
     {section name=dat loop=$order}
-        {section name=i loop=$order[dat].ord_unit}
+        {$test = $order[dat].id_order}
         {assign var="_i_" value=$smarty.section.dat.index}
         {if $_i_ is even}{assign var="_j_" value="1"}{else}{assign var="_j_" value="0"}{/if}
         {if $main[idx].type != 0}
@@ -170,35 +178,39 @@
         {/if}
         <tr align="right" valign="top" onMouseOver="RowOver({$_i_})" onMouseOut="RowOut({$_i_})">
             <td align="left" class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="5%" height="23">
-                {if $smarty.section.i.index == 0 }{$img.id}<a href="ord_unit_status1.php?ord={$order[dat].id}">{$order[dat].id}</a>{else}{''}{/if}</td>
+                {if $test == $id }{$order[dat].id_order}{else}{''}{/if}</td>
             <td class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="5%" height="23">
-                {$order[dat].ord_unit[i].id_ord_unit}</td>
-            <td class="row{$_j_}{cycle name="parity" values="1,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="30%" height="23">
-                {if $order[dat].ord_unit[i].c_status == 0}{'Cutting not start yet.'}<br>
-                {elseif $order[dat].ord_unit[i].c_status == 1}{'In process '}{$order[dat].ord_unit[i].c_operator}<br>{'START '}{$order[dat].ord_unit[i].c_start_time}
-                {elseif $order[dat].ord_unit[i].c_status == 2}{'Finished '}{$order[dat].ord_unit[i].c_operator}
-                    <br>{'START '}{$order[dat].ord_unit[i].c_start_time}
-                    {'- END '}{$order[dat].ord_unit[i].c_fin_time}
+                {$order[dat].id_ord_unit}</td>
+            <td class="row{$_j_}{cycle name="parity" values="1,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="28%" height="23">
+                {if $order[dat].c_status == 0}{'Template not start yet.'}<br>
+                {elseif $order[dat].c_status == 1}{'In process '}{$order[dat].c_name}<br>{'START '}{$order[dat].c_start_time}
+                {elseif $order[dat].c_status == 2}{'Finished '}{$order[dat].c_name}
+                    <br>{'START '}{$order[dat].c_start_time}
+                    {'- END '}{$order[dat].c_fin_time}
                 {/if}
             </td>
-            <td class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="30%" height="23">
-                {if $order[dat].ord_unit[i].p_status == 0}{'Production not start yet.'}<br>
-                {elseif $order[dat].ord_unit[i].p_status == 1}{'In process '}{$order[dat].ord_unit[i].p_operator}<br>{' START '}{$order[dat].ord_unit[i].p_start_time}
-                {elseif $order[dat].ord_unit[i].p_status == 2}{'Finished '}{$order[dat].ord_unit[i].p_operator}
-                    <br>{' START '}{$order[dat].ord_unit[i].p_start_time}
-                    {'- END '}{$order[dat].ord_unit[i].p_fin_time}
+            <td class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="28%" height="23">
+                {if $order[dat].p_status == 0}{'Production not start yet.'}<br>
+                {elseif $order[dat].p_status == 1}{'In process '}{$order[dat].p_name}<br>{' START '}{$order[dat].p_start_time}
+                {elseif $order[dat].p_status == 2}{'Finished '}{$order[dat].p_name}
+                    <br>{' START '}{$order[dat].p_start_time}
+                    {'- END '}{$order[dat].p_fin_time}
                 {/if}
             </td>
-            <td class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="30%" height="23">
-                {if $order[dat].ord_unit[i].i_status == 0}{'Installation not start yet.'}<br>
-                {elseif $order[dat].ord_unit[i].i_status == 1}{'In process '}{$order[dat].ord_unit[i].i_operator}<br>{' START '}{$order[dat].ord_unit[i].i_start_time}
-                {elseif $order[dat].ord_unit[i].i_status == 2}{'Finished '}{$order[dat].ord_unit[i].i_operator}
-                    <br>{' START '}{$order[dat].ord_unit[i].i_start_time}
-                    {'- END '}{$order[dat].ord_unit[i].i_fin_time}
+            <td class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="28%" height="23">
+                {if $order[dat].i_status == 0}{'Installation not start yet.'}<br>
+                {elseif $order[dat].i_status == 1}{'In process '}{$order[dat].i_name}<br>{' START '}{$order[dat].i_start_time}
+                {elseif $order[dat].i_status == 2}{'Finished '}{$order[dat].i_name}
+                    <br>{' START '}{$order[dat].i_start_time}
+                    {'- END '}{$order[dat].i_fin_time}
                 {/if}
             </td>
+            <td align="center" class="row{$_j_}{cycle name="parity" values="0,1"}" id="{$_i_}{cycle name="col_cycle" values="$columns"}" width="6%" height="23">
+               {if $order[dat].u_status==1 } Standard
+               {else} Obsolete
+               {/if} </td>
         </tr>
-        {/section}
+        {$id = $order[dat].id_order}
     {/section}
     {include file="table_footer.tpl"}
     <br><center>{$paging}</center>
