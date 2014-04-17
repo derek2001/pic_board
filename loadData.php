@@ -28,6 +28,22 @@ if($uid!=0){
     $worker = $_SESSION['user']->db->fetchArray();
     if($_SESSION['user']->db->numrows() > 0){
         $response = $worker['fname']." ".$worker['lname'] ;
+        /*$select = "select * from ord_unit_status where status in (1,2)
+            and (c_operator = ".$worker['id_punch']." or p_operator = ".$worker['id_punch'].")
+            and (c_status = 1 or p_status = 1)
+            ";
+        $_SESSION["user"]->db->select($select);
+        $u = $_SESSION['user']->db->fetchArray();
+        if($_SESSION['user']->db->numrows() > 0){
+            $response = "reject|worker active|"+$response;
+        }
+
+
+        $_SESSION['user']->db->select("select * from ord_unit_helper
+            where id_ord_unit = ".$u['id_ord_unit']."
+            and id_order = ".$u['id_order']."
+        ");*/
+
     }
     if($response!=="")
         echo $response;

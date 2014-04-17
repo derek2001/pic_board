@@ -29,7 +29,7 @@ function initUnitStatus($orders){
             $mem = $_SESSION["user"]->db->fetchArray();
             if($_SESSION["user"]->db->numrows() < 1)
             {
-                $insert = "INSERT INTO [SlabImgDB].[dbo].[ord_unit_status]
+                $insert = "INSERT INTO [ord_unit_status]
                  VALUES
                    (".$order['id']."
                    ,".$unit['id']."
@@ -43,8 +43,8 @@ function initUnitStatus($orders){
         }
     }
 }
-$error = "PLEASE SCAN YOUR WORK ORDER UNIT BARCODE.&#13;&#10;PLEASE SCAN YOUR WORK ORDER UNIT BARCODE.";
-$error = "EMPLOYEE ID NOT ACCEPTED. CUTTING IN PROGRESS.&#13;&#10;DO YOU WANT ADD EXTRA HELP? FOR YES PRESS CONFIRM.";
+$msg = "PLEASE SCAN YOUR WORK ORDER UNIT BARCODE.&#13;&#10;PLEASE SCAN YOUR WORK ORDER UNIT BARCODE.";
+$msg = "EMPLOYEE ID NOT ACCEPTED. CUTTING IN PROGRESS.&#13;&#10;DO YOU WANT ADD EXTRA HELP? FOR YES PRESS CONFIRM.";
 $select = "select * from [order] where status = 4 ";
 $_SESSION["user"]->db->select($select);
 $order_init = $_SESSION["user"]->db->fetchAllArrays();
@@ -61,10 +61,10 @@ if($id_worker!=0 && $id_unit!=0){
         $update = "update [ord_unit_status] set status=0 where id_ord_unit=".$id_unit."";
         if(!$_SESSION["user"]->db->update('ord_unit_status', $obUnit['id'], $update))
         {
-            $error = "Saving data failed.";
+            $msg = "Saving data failed.";
         }
 
-        $insert = "INSERT INTO [SlabImgDB].[dbo].[ord_unit_status]
+        $insert = "INSERT INTO [ord_unit_status]
                  VALUES
                    (".$id_order."
                    ,".$id_unit."
@@ -74,15 +74,208 @@ if($id_worker!=0 && $id_unit!=0){
                    )";
         $_SESSION["user"]->db->insert($insert);
         $msg="Procedure restart for Unit: ".$id_unit."";
-        $error='';
+        $msg='';
     }
 
 }
 elseif( (strcmp(($_POST['workorder']), '')==0 || strcmp(($_POST['employee']), '')==0)
-        && ($_POST['cancel'] == 'CANCEL' || $_POST['confirm'] == 'CONFIRM')){
-    $error = "Please scan the barcode for Unit and Operator!";
+        && $_POST['confirm'] == 'CONFIRM'){
+    $msg = "PLEASE SCAN THE BARCODE FOR UNIT AND WORKER.";
 }
-elseif ($_POST['cancel'] == 'CANCEL') {
+else if($_POST['confirm'] == 'CONFIRM'){
+    $_SESSION['BARCODE_SESSION']['BARCODE'] = $_POST;
+    $uid = $_SESSION['BARCODE_SESSION']['BARCODE']['workorder'];
+    $eid = $_SESSION['BARCODE_SESSION']['BARCODE']['employee'];
+    $stage = (int)$_SESSION['BARCODE_SESSION']['BARCODE']['stage'];
+    unset ($_POST);
+    $msg = '';
+    $eid = substr($eid, 3, strlen($eid));
+    $array = explode(' ', $uid);
+
+    $sql = "select id, (fname + ' ' + lname) as name, id_punch from [worker] w
+            where w.id_punch = ".$eid."
+            ";
+    //check to see if the user exist
+    $_SESSION["user"]->db->select($sql);
+    $worker = $_SESSION["user"]->db->fetchArray();
+
+    if($_SESSION["user"]->db->numrows() > 0)
+    {
+        $sql="select * from [ord_unit_status] ous where status=1 and ous.id_ord_unit = ".$array[3]." and ous.id_order = ".$array[1]." ";
+        $_SESSION["user"]->db->select($sql);
+        if($_SESSION["user"]->db->numrows() > 0)
+        {
+            $sql_update = '';
+            $sql_insert = '';
+            if($stage == 0)
+            {
+                //for table ord_unit_helper stage column,
+                // 1 for cutting stage, 2 for production stage, 3 for installation stage.
+                $unit = $_SESSION["user"]->db->fetchArray();
+                if($unit['i_status']==1){
+                    $sql_update = "update [ord_unit_status] set i_status=2, i_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[3]."";
+                    $msg = "INSTALLATION STAGE FINISHED.";
+                }elseif($unit['i_status']==0 && $unit['p_status']==2){
+                    $sql_update = "update [ord_unit_status] set i_status=1, i_start_time = GETDATE(), i_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[3]."";
+                    $msg = "PLEASE START INSTALLATION.";
+                }elseif($unit['p_status']==1){
+                    if($unit['p_operator'] == $worker['id_punch'])
+                    {
+                        $sql_update = "update [ord_unit_status] set p_status=2, p_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[3]."";
+                        $msg = "FABRICATION/CNC STAGE FINISHED.";
+                    }else{
+                        $sql_insert = "INSERT INTO [ord_unit_helper] VALUES(".$unit['id_order']." ,".$unit['id_ord_unit']." ,2 ,".$worker['id_punch'].")";
+                        $msg = "HELPER ACCEPTED. PLEASE START FABRICATION/CNC.";
+                    }
+                }elseif($unit['p_status']==0 && $unit['c_status']==2){
+                    $sql_update = "update [ord_unit_status] set p_status=1, p_start_time = GETDATE(), p_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[3]."";
+                    $msg = "PLEASE START FABRICATION/CNC.";
+                }elseif($unit['c_status']==1){
+                    if($unit['c_operator'] == $worker['id_punch'])
+                    {
+                        $sql_update = "update [ord_unit_status] set c_status=2, c_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[3]."";
+                        $msg = "CUTTING STAGE FINISHED.";
+                    }else{
+
+                        $sql_insert = "INSERT INTO [ord_unit_helper] VALUES(".$unit['id_order']." ,".$unit['id_ord_unit']." ,1 ,".$worker['id_punch'].")";
+                        $msg = "HELPER ACCEPTED. PLEASE START CUTTING.";
+                    }
+                }elseif($unit['c_status']==0){
+                    $sql_update = "update [ord_unit_status] set c_status=1, c_start_time = GETDATE(), c_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[3]."";
+                    $msg = "PLEASE START CUTTING.";
+                }
+
+                if(strcmp($sql_update, '') != 0){
+                    if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                    {
+                        $msg = "SAVING DATA FAILED.";
+                    }
+                }
+
+                if(strcmp($sql_insert, '') != 0){
+                    $_SESSION["user"]->db->insert($sql_insert);
+                }
+            }
+            else{
+
+            }
+        }
+        else{
+            $msg = "WORK ORDER BARCODE NOT ACCEPTED.&#13;&#10;PLEASE SCAN THE CORRECT WORK ORDER BARCODE ID.";
+        }
+    }else{
+        $msg = "ID BARCODE NUMBER NOT ACCEPTED.&#13;&#10;PLEASE SCAN THE CORRECT ID BARCODE NUMBER.";
+    }
+
+}
+
+include('Smarty.class.php');
+$smarty = new Smarty;
+$smarty->assign('error',$msg);
+$smarty->assign('msg', $msg);
+$smarty->assign('alert', $alert);
+$smarty->assign('uid', $array[3]);
+$smarty->assign('eid', $eid);
+
+$smarty->display('barcode.tpl');    
+
+
+
+/*
+ *
+ * if((int)($array[1]) == 0)
+                {
+                    if((int)($unit['c_status']) == 0){
+                        $sql_update = "update [ord_unit_status] set c_status=1, c_start_time = GETDATE(), c_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[3]."";
+                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                        {
+                            $error = "Saving data failed.";
+                        }
+                        else
+                        {
+                            $msg = "Start template procedure of Unit: ". $array[0];
+                        }
+                    }
+                    elseif((int)($unit['c_status']) == 1){
+                        $sql_update = "update [ord_unit_status] set c_status=2, c_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
+                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                        {
+                            $error = "Saving data failed.";
+                        }
+                        else
+                        {
+                            $msg = "Template procedure of Unit: ".$array[0]." finished";
+                        }
+                    }elseif((int)($unit['c_status']) == 2)
+                    {
+                        $alert = "This stage is already done. Do you want to redo it?";
+                    }
+                }elseif((int)($array[1]) == 1){
+                    if((int)($unit['c_status']) == 2)
+                    {
+                        if((int)($unit['p_status']) == 0){
+                            $sql_update = "update ord_unit_status set p_status=1, p_start_time = GETDATE(), p_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[0]."";
+                            if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                            {
+                                $error = "Saving data failed.";
+                            }
+                            else
+                            {
+                                $msg = "Start production procedure of Unit: ". $array[0];
+                            }
+                        }
+                        elseif((int)($unit['p_status']) == 1){
+                            $sql_update = "update ord_unit_status set p_status=2, p_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
+                            if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                            {
+                                $error = "Saving data failed.";
+                            }
+                            else
+                            {
+                                $msg = "Production procedure of Unit: ".$array[0]." finished";
+                            }
+                        }elseif((int)($unit['p_status']) == 2)
+                        {
+                            $alert = "This stage is already done. Do you want to redo it?";
+                        }
+                    }else{
+                        $error = "Please finish template before start this stage.";
+                    }
+                }elseif((int)($array[1]) == 2){
+                    if((int)($unit['p_status']) == 2)
+                    {
+                        if((int)($unit['i_status']) == 0){
+                            $sql_update = "update [ord_unit_status] set i_status=1, i_start_time = GETDATE(), i_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[0]."";
+                            if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                            {
+                                $error = "Saving data failed.";
+                            }
+                            else
+                            {
+                                $msg = "Start installation procedure of Unit: ". $array[0];
+                            }
+                        }
+                        elseif((int)($unit['i_status']) == 1){
+                            $sql_update = "update [ord_unit_status] set i_status=2, i_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
+                            if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
+                            {
+                                $error = "Saving data failed.";
+                            }
+                            else
+                            {
+                                $msg = "Installation procedure of Unit: ".$array[0]." finished";
+                            }
+                        }elseif((int)($unit['i_status']) == 2)
+                        {
+                            $alert = "This stage is already done. Do you want to redo it?";
+                        }
+                    }else{
+                        $error = "Please finish production before start this stage.";
+                    }
+                }
+
+
+ * elseif ($_POST['cancel'] == 'CANCEL') {
     $_SESSION['BARCODE_SESSION']['BARCODE'] = $_POST;
     $uid = $_SESSION['BARCODE_SESSION']['BARCODE']['workorder'];
     $eid = $_SESSION['BARCODE_SESSION']['BARCODE']['employee'];
@@ -170,138 +363,5 @@ elseif ($_POST['cancel'] == 'CANCEL') {
         $error = "This employee doesn't exist.";
     }
 }
-else if($_POST['confirm'] == 'CONFIRM'){
-    $_SESSION['BARCODE_SESSION']['BARCODE'] = $_POST;
-    $uid = $_SESSION['BARCODE_SESSION']['BARCODE']['workorder'];
-    $eid = $_SESSION['BARCODE_SESSION']['BARCODE']['employee'];
-    unset ($_POST);
-    $error = '';
-    $uid = substr($uid, 1, strlen($uid));
-    $eid = substr($eid, 1, strlen($eid));
-    $array = explode('-', $uid);
-
-    $sql = "select id, (fname + ' ' + lname) as name, id_punch from [worker] w
-            where w.id_punch = ".$eid."
-            ";
-    //check to see if the user exist
-    $_SESSION["user"]->db->select($sql);
-    $worker = $_SESSION["user"]->db->fetchArray();
-
-    if($_SESSION["user"]->db->numrows() > 0)
-    {
-        $sql="select * from [ord_unit_status] ous where status=1 and ous.id_ord_unit = ".$array[0]."";
-        $_SESSION["user"]->db->select($sql);
-        if($_SESSION["user"]->db->numrows() > 0)
-        {
-            $unit = $_SESSION["user"]->db->fetchArray();
-            if((int)($array[1]) == 0)
-            {
-                if((int)($unit['c_status']) == 0){
-                    $sql_update = "update [ord_unit_status] set c_status=1, c_start_time = GETDATE(), c_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[0]."";
-                    if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                    {
-                        $error = "Saving data failed.";
-                    }
-                    else
-                    {
-                        $msg = "Start template procedure of Unit: ". $array[0];
-                    }
-                }
-                elseif((int)($unit['c_status']) == 1){
-                    $sql_update = "update [ord_unit_status] set c_status=2, c_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
-                    if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                    {
-                        $error = "Saving data failed.";
-                    }
-                    else
-                    {
-                        $msg = "Template procedure of Unit: ".$array[0]." finished";
-                    }
-                }elseif((int)($unit['c_status']) == 2)
-                {
-                    $alert = "This stage is already done. Do you want to redo it?";
-                }
-            }elseif((int)($array[1]) == 1){
-                if((int)($unit['c_status']) == 2)
-                {
-                    if((int)($unit['p_status']) == 0){
-                        $sql_update = "update ord_unit_status set p_status=1, p_start_time = GETDATE(), p_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[0]."";
-                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                        {
-                            $error = "Saving data failed.";
-                        }
-                        else
-                        {
-                            $msg = "Start production procedure of Unit: ". $array[0];
-                        }
-                    }
-                    elseif((int)($unit['p_status']) == 1){
-                        $sql_update = "update ord_unit_status set p_status=2, p_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
-                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                        {
-                            $error = "Saving data failed.";
-                        }
-                        else
-                        {
-                            $msg = "Production procedure of Unit: ".$array[0]." finished";
-                        }
-                    }elseif((int)($unit['p_status']) == 2)
-                    {
-                        $alert = "This stage is already done. Do you want to redo it?";
-                    }
-                }else{
-                    $error = "Please finish template before start this stage.";
-                }
-            }elseif((int)($array[1]) == 2){
-                if((int)($unit['p_status']) == 2)
-                {
-                    if((int)($unit['i_status']) == 0){
-                        $sql_update = "update [ord_unit_status] set i_status=1, i_start_time = GETDATE(), i_operator = '".$worker['id_punch']."' where status=1 and id_ord_unit = ".$array[0]."";
-                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                        {
-                            $error = "Saving data failed.";
-                        }
-                        else
-                        {
-                            $msg = "Start installation procedure of Unit: ". $array[0];
-                        }
-                    }
-                    elseif((int)($unit['i_status']) == 1){
-                        $sql_update = "update [ord_unit_status] set i_status=2, i_fin_time = GETDATE() where status=1 and id_ord_unit = ".$array[0]."";
-                        if(!$_SESSION["user"]->db->update('ord_unit_status', $unit['id'], $sql_update))
-                        {
-                            $error = "Saving data failed.";
-                        }
-                        else
-                        {
-                            $msg = "Installation procedure of Unit: ".$array[0]." finished";
-                        }
-                    }elseif((int)($unit['i_status']) == 2)
-                    {
-                        $alert = "This stage is already done. Do you want to redo it?";
-                    }
-                }else{
-                    $error = "Please finish production before start this stage.";
-                }
-            }
-        }
-        else{
-            $error = "This unit id doesn't exist.";
-        }
-    }else{
-        $error = "This employee doesn't exist.";
-    }
-
-}
-
-include('Smarty.class.php');
-$smarty = new Smarty;
-$smarty->assign('error',$error);
-$smarty->assign('msg', $msg);
-$smarty->assign('alert', $alert);
-$smarty->assign('uid', $array[0]);
-$smarty->assign('eid', $eid);
-
-$smarty->display('barcode.tpl');    
-   
+ */
 ?>

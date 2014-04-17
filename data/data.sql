@@ -17,3 +17,12 @@ CREATE TABLE ord_unit_status(
 	i_start_time DATETIME null,
 	i_fin_time DATETIME null
 )
+
+use SlabImgDB
+CREATE TABLE ord_unit_helper(
+	id INTEGER IDENTITY PRIMARY KEY,
+	id_order INTEGER NOT NULL,
+	id_ord_unit INTEGER NOT NULL,
+	stage INTEGER NOT NULL,
+	id_punch INTEGER NOT NULL
+)

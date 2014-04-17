@@ -12,14 +12,19 @@ include_once("functions/paging.php");
 $_SESSION["user"]->db->connect('erp');
 $loc = $_SESSION["user"]->getLocationProfile();
 
-function imageSelect()
-{
-    return array($_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER']=>'<img src=\'gfx/'.$_SESSION['ORD_UNIT_STATUS_SESSION']['ORDER_DIR'].'.gif\'>');
-}
 //--------------------------------------------------------------------------------------------------------------------------------------------
 
-$select = "select * from dbo.unit_status_select() where status = 4 and u_status = 1
-    order by c_status desc, p_status desc, i_status desc, id_order asc, id_ord_unit asc";
+$select = "select ous.id_order, ous.id_ord_unit, ous.c_status, ous.c_operator, DATEDIFF(minute, ous.c_start_time, GETDATE()) as time , f.sign, UPPER(st.name) as sname, (fname+' '+lname) as name, o.id_location
+    from ord_unit_status ous
+    inner join ord_slab os on ous.id_ord_unit = os.id_ord_unit
+    inner join slab_frame sf on os.id_slab_frame = sf.id
+    inner join frame f on f.id = sf.id_frame
+    inner join slab s on s.id = sf.id_slab
+    inner join stone st on st.id = s.id_stone
+    inner join worker w on w.id_punch = ous.c_operator
+    inner join [order] o on o.id = ous.id_order
+    where ous.status = 1 and c_status = 1
+    order by id_order asc, id_ord_unit asc";
 $_SESSION["user"]->db->select($select);
 $orders = $_SESSION["user"]->db->fetchAllArrays();
 
@@ -50,7 +55,6 @@ $smarty->assign('insert',$insert);
 
 $smarty->assign('description',$_POST['description']);
 $smarty->assign('order',$orders);
-$smarty->assign('img',imageSelect());
 $smarty->display('ord_unit_monitor.tpl');
 
 ?>

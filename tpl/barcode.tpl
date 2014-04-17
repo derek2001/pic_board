@@ -35,12 +35,21 @@
    $(document).ready(function(){
        $("#employee").focusout(function(){
            var e = $(this).val();
-           loadEmployee(0, e);
+           var arr;
+           if(!isNaN(e))
+               arr = new Array(e);
+           else if(e.substring(0,2) == 'ID'){
+               e = e.substring(3, e.length);
+               arr = e.split(',');
+           }
+           var id = e.length;
+           loadEmployee(0, arr);
        });
    });
 
    var xmlhttp;
    var spans= new Array("sp_1","sp_2","sp_3","sp_4","sp_5","sp_6");
+
    function loadData(uid, eid){
        $.ajax({
            type:"GET",
@@ -80,13 +89,57 @@
                }
 
                if(id_order!=''){
-                  $('#msg').html("WORK ORDER UNIT ACCEPTED.&#13;&#10;PLEASE SCAN YOUR ID NUMBER BARCODE.");
+                  if($("#employee").val()=='')
+                        $('#msg').html("WORK ORDER UNIT ACCEPTED.&#13;&#10;PLEASE SCAN YOUR ID NUMBER BARCODE.");
+                  else
+                        $('#msg').html("WORK ORDER UNIT ACCEPTED.&#13;&#10;FOR YES PLEASE PRESS CONFIRM BUTTON.");
                }
            }
        });
    }
 
    function loadEmployee(uid, eid){
+       var name = '';
+       var re = '';
+       var size = eid.length;
+
+       var node = document.getElementById('ep');
+       while (node.hasChildNodes()) {
+           node.removeChild(node.lastChild);
+       }
+
+
+       for(var i=0; i<size; i++)
+       {
+
+           (function(e){$.ajax({
+               type:"GET",
+               url:"loadData.php",
+               data:"uid=" + uid + "&eid=" +eid[e],
+               dataType: "html",
+               beforeSend:function(xhr){
+                   xhr.setRequestHeader("Ajax-Request", "true");
+               },
+               success:function(response){
+                   name = response+' ';
+                   name = "<div style='display: inline'>"+name+"</div>";
+                   $('#ep').append(name);
+
+                   var wo = $("#workorder").val();
+                   if(wo=='')
+                        $('#msg').html("EMPLOYEE ID ACCEPTED.&#13;&#10;PLEASE SCAN THE WORK ORDER UNIT BARCODE.");
+                   else
+                        $('#msg').html("EMPLOYEE ID ACCEPTED.&#13;&#10;FOR YES PLEASE PRESS CONFIRM BUTTON.");
+               }
+           });
+       })(i)
+       }
+
+
+       $("#employee").val("ID " + eid);
+   }
+
+   function loadStatus(uid, eid){
        $.ajax({
            type:"GET",
            url:"loadData.php",
@@ -96,15 +149,72 @@
                xhr.setRequestHeader("Ajax-Request", "true");
            },
            success:function(response){
-               $("#employee").attr('align', 'left');
-               $("#employee").val("ID " + eid);
+               var c_status = response.substring(9,10);
+               var p_status = response.substring(20,21);
+               var i_status = response.substring(31,32);
+               var len = response.length;
+               var id_order = response.substring(42,len);
 
-               document.getElementById('ep').innerHTML = response;
-               if(response!=''){
-                   $('#msg').html("EMPLOYEE ID ACCEPTED.&#13;&#10;FOR YES PRESS CONFIRM .");
+               if(i_status=='1')
+               {
+                   document.getElementById('sp_6').className="type_aa_selected";
+                   resetClass("sp_6");
+               }else if(i_status=='0' && p_status=='2'){
+                   document.getElementById('sp_5').className="type_aa_selected";
+                   resetClass("sp_5");
+               }else if(p_status=='1'){
+                   document.getElementById('sp_4').className="type_aa_selected";
+                   resetClass("sp_4");
+               }else if(p_status=='0' && c_status=='2'){
+                   document.getElementById('sp_3').className="type_aa_selected";
+                   resetClass("sp_3");
+               }else if(c_status=='1'){
+                   document.getElementById('sp_2').className="type_aa_selected";
+                   resetClass("sp_2");
+               }else if(c_status=='0'){
+                   document.getElementById('sp_1').className="type_aa_selected";
+                   resetClass("sp_1");
                }
            }
        });
+   }
+
+   function loadStatus2(uid, eid){
+       var name = '';
+       var re = '';
+       var arr;
+       if(!isNaN(eid))
+           arr = new Array(eid+'');
+       else if(eid.substring(0,2) == 'ID'){
+           eid = eid.substring(3, e.length);
+           arr = eid.split(',');
+       }
+
+       var size = arr.length;
+       var node = document.getElementById('ep');
+       while (node.hasChildNodes()) {
+           node.removeChild(node.lastChild);
+       }
+
+
+       for(var i=0; i<size; i++)
+       {
+           (function(e){$.ajax({
+               type:"GET",
+               url:"loadData.php",
+               data:"uid=" + uid + "&eid=" +arr[e],
+               dataType: "html",
+               beforeSend:function(xhr){
+                   xhr.setRequestHeader("Ajax-Request", "true");
+               },
+               success:function(response){
+                   name = response+' ';
+                   name = "<div style='display: inline'>"+name+"</div>";
+                   $('#ep').append(name);
+               }
+           });
+           })(i)
+       }
    }
 
    function resetClass(id){
@@ -115,10 +225,26 @@
        }
    }
 
+   function selectPhase(){
+       var el = document.getElementById("overlay");
+       el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+   }
+
+   function close() {
+       document.getElementById("overlay").style.visibility = 'hidden';
+   }
+
+   function select(){
+       var e = document.getElementById('stageDropDown');
+       var st = e.options[e.selectedIndex].value;
+       document.getElementById('stage').value = st;
+       document.getElementById("overlay").style.visibility = 'hidden';
+   }
+
 </script>
 <style>
 .input {
-  margin: 15px 0 0px 15px;
+  margin: 0px 0 0px 15px;
   background: white;
   float: left;
   clear: both;
@@ -156,13 +282,30 @@ span.type_aa_selected
 .td{
     text-align: right;
  }
-
+.close { text-decoration: underline }
+#overlay {
+    visibility: hidden;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100px;
+    text-align:center;
+    z-index: 200;
+    opacity:2.0;
+}
+#overlay div {
+    width:250px;
+    margin: 200px auto;
+    background-color: #ffffff;
+    border:2px solid #000;
+    text-align:center;
+}
 </style>
 {/literal}
 
 {assign var="module_name" value="Work Order Check In"}
 {include file="module_header.tpl"}
-<br>
 
 {assign var="table_width" value="1022"}
 {assign var="table_headertitle" value="Scan Screen"}
@@ -193,7 +336,7 @@ span.type_aa_selected
 </tr>
 ---->
 <tr ><td>
-    <form action="barcode.php" method="post" name="barcode" id="barcode-form">
+    <form action="barcode.php" method="post" name="barcode" id="barcode-form" >
     <div style="float: right">
         <label class="input">
         <textarea name="msg" id="msg" cols="100" rows="2" class="input" disabled="true"
@@ -202,31 +345,29 @@ span.type_aa_selected
             font-size: 34px; margin: 15px 15px 15px 0; color: #ffffff; resize: none; overflow: hidden;
             font-weight: 500; background-color: #7EB6FF" >{$error}&#x00A;
         </textarea >
-    </div>  
+    </div>
     </td>
 </tr>
 <tr><td>
     <div style="float: left">
     <label class="input">
-        <span style="height: 51px; width: 375px; text-align: left; font-size: 35px; margin-left: 20px">WORK ORDER UNIT</span>
-        <input type="text" name="workorder" id="workorder" value="" style="height: 50px; padding-left: 10px;width: 350px; text-align: left; font-size: 25px; color: #800000; font-weight: bold;">
+        <input type="text" name="workorder" id="workorder" value="" style="height: 115px; padding-left: 10px;width: 350px; text-align: left; font-size: 50px; color: #800000; font-weight: bold;">
     </label>
     <label class="input">
-        <span style="height: 51px; width: 375px; text-align: left; font-size: 35px; margin-left: 90px">EMPLOYEE</span>
-        <input type="text" name="employee" id="employee" value="" style="height: 50px; padding-left: 10px;width: 350px; text-align: left; font-size: 25px; color: #800000; font-weight: bold;">
+        <input type="hidden" name="stage" id="stage" value="0">
     </label>
     </div>
     <div style="float: right">
         <input type="SUBMIT" value="CANCEL" name="cancel" id="cancel" class="BUTTON_OK"
                style="height: 115px; width: 300px; text-align: center;
-               font-size: 55px; margin: 15px 15px 15px 0; color: #ffffff;
+               font-size: 55px; margin: 0px 15px 15px 0; color: #ffffff;
                font-weight: bold; background-color: #90ee90">
     </div>
     <div style="float: right">
         <input type="SUBMIT" value="CONFIRM" name="confirm" id="confirm" class="BUTTON_OK"
                style="height: 115px; width: 300px; text-align: center;
-               font-size: 55px; margin: 15px 15px 15px 0; color: #ffffff;
-               font-weight: bold; background-color: #EEB4B4">
+               font-size: 55px; margin: 0px 15px 15px 0; color: #ffffff;
+               font-weight: bold; background-color: #EEB4B4" >
     </div>
     </form>
 </td></tr>
@@ -252,22 +393,239 @@ span.type_aa_selected
                                 <td colspan="2" width="987px" style="border: solid 1px #000000;">
                                     <table width="987px">
                                         <tr>
-                                            <td align="left" style="font-size: 28px; font-weight: bold; color: #7EB6FF">
-                                                <div style="padding-left: 10px">
-                                                    CURRENT STATUS
+                                            <td style="float: left">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    EMPLOYEE:
                                                 </div>
                                             </td>
-                                            <td align="right" vlign="top">
-                                                <div style="float: right">
-                                                    <input type="button" value="CLICK HERE TO SELECT PHASE MANUALLY" name="select_phase" id="phase"
-                                                           style="clear: left; background-color: #7777cc; color: #ffffff; font-size: 18px; font-weight: bold">
+                                            <td style="float: right">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    <div id="ep" style="float:right; display: inline; text-align: right">afhakfjka</div>
                                                 </div>
                                             </td>
                                         </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table></td>
+                    <td class="cell_table_right"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_ld"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                    <td width="333" class="cell_table_down"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_rd"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                </tr>
+            </table></td>
+    </tr>
+</table>
+
+<table width="1022px" border="0" align="center" cellpadding="0" cellspacing="0">
+
+    <tr>
+        <td width="333" height="1"><img src="gfx/spacer.gif" width="1" height="1"></td>
+    </tr>
+    <tr>
+        <td><table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="cell_table_lefttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="333" class="cell_table_top"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_righttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_left"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="{math equation="x-y" x=$table_width y=2}" class="cell_tablecenter">
+                        <table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="15">
+                            <tr>
+                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
+                                    <table width="987px">
+                                        <tr>
+                                            <td style="float: left">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    ASSIGNED WORK ORDER/SERVICE:
+                                                </div>
+                                            </td>
+                                            <td style="float: right">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    <div id="ep" style="float:right; display: inline; text-align: right">afhakfjka</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table></td>
+                    <td class="cell_table_right"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_ld"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                    <td width="333" class="cell_table_down"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_rd"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                </tr>
+            </table></td>
+    </tr>
+</table>
+
+<table width="1022px" border="0" align="center" cellpadding="0" cellspacing="0">
+
+    <tr>
+        <td width="333" height="1"><img src="gfx/spacer.gif" width="1" height="1"></td>
+    </tr>
+    <tr>
+        <td><table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="cell_table_lefttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="333" class="cell_table_top"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_righttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_left"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="{math equation="x-y" x=$table_width y=2}" class="cell_tablecenter">
+                        <table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="15">
+                            <tr>
+                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
+                                    <table width="987px">
+                                        <tr>
+                                            <td style="float: left">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    ASSIGNED UNIT/UNITS:
+                                                </div>
+                                            </td>
+                                            <td style="float: right">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    <div id="ep" style="float:right; display: inline; text-align: right">afhakfjka</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table></td>
+                    <td class="cell_table_right"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_ld"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                    <td width="333" class="cell_table_down"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_rd"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                </tr>
+            </table></td>
+    </tr>
+</table>
+
+<table width="1022px" border="0" align="center" cellpadding="0" cellspacing="0">
+
+    <tr>
+        <td width="333" height="1"><img src="gfx/spacer.gif" width="1" height="1"></td>
+    </tr>
+    <tr>
+        <td><table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="cell_table_lefttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="333" class="cell_table_top"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_righttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_left"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="{math equation="x-y" x=$table_width y=2}" class="cell_tablecenter">
+                        <table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="15">
+                            <tr>
+                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
+                                    <table width="987px">
+                                        <tr>
+                                            <td style="float: left">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    ASSIGNED OTHER EMPLOYEES:
+                                                </div>
+                                            </td>
+                                            <td style="float: right">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    <div id="ep" style="float:right; display: inline; text-align: right">afhakfjka</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table></td>
+                    <td class="cell_table_right"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_ld"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                    <td width="333" class="cell_table_down"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_rd"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                </tr>
+            </table></td>
+    </tr>
+</table>
+
+<table width="1022px" border="0" align="center" cellpadding="0" cellspacing="0">
+
+    <tr>
+        <td width="333" height="1"><img src="gfx/spacer.gif" width="1" height="1"></td>
+    </tr>
+    <tr>
+        <td><table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="cell_table_lefttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="333" class="cell_table_top"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_righttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_left"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="{math equation="x-y" x=$table_width y=2}" class="cell_tablecenter">
+                        <table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="15">
+                            <tr>
+                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
+                                    <table width="987px">
+                                        <tr>
+                                            <td style="float: left">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    ASSIGNED EQUIPMENT:
+                                                </div>
+                                            </td>
+                                            <td style="float: right">
+                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 20px;font-weight: bold">
+                                                    <div id="ep" style="float:right; display: inline; text-align: right">afhakfjka</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table></td>
+                    <td class="cell_table_right"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_ld"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                    <td width="333" class="cell_table_down"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_rd"><img src="gfx/spacer.gif" width="1" height="1"></td>
+                </tr>
+            </table></td>
+    </tr>
+</table>
+
+<table width="1022px" border="0" align="center" cellpadding="0" cellspacing="0">
+
+    <tr>
+        <td width="333" height="1"><img src="gfx/spacer.gif" width="1" height="1"></td>
+    </tr>
+    <tr>
+        <td><table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="cell_table_lefttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="333" class="cell_table_top"><img src="gfx/spacer.gif" width="333" height="3"></td>
+                    <td class="cell_table_righttophard_01"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                </tr>
+                <tr>
+                    <td class="cell_table_left"><img src="gfx/spacer.gif" width="3" height="3"></td>
+                    <td width="{math equation="x-y" x=$table_width y=2}" class="cell_tablecenter">
+                        <table width="{math equation="x-y" x=$table_width y=2}" border="0" cellpadding="0" cellspacing="15">
+                            <tr>
+                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
+                                    <table width="987px">
                                         <tr>
                                             <td colspan="2" class="type_aa">
                                                 <div id="sp" style="padding-bottom: 8px; padding-left: 5px">
-                                                    <span id="sp_1">AWAITING CUTTING</span>
+                                                    {if $uid!=''}<script>loadStatus({$uid}, 0);</script>{/if}<span id="sp_1">AWAITING CUTTING</span>
                                                     <span id="sp_2">CUTTING</span>
                                                     <span id="sp_3">AWAITING FABRICATION/CNC</span>
                                                     <span id="sp_4">FABRICATION/CNC</span>
@@ -276,16 +634,18 @@ span.type_aa_selected
                                                 </div>
                                             </td>
                                         </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" width="987px" style="border: solid 1px #000000;">
-                                    <table width="987px">
                                         <tr>
-                                            <td colspan="2">
-                                                <div style="float: left; padding-left: 10px; color: #7EB6FF;font-size: 16px;">
-                                                    ACTIVE EMPLOYEE: <div id="ep" style="display: inline"></div>
+                                            <td style="margin-right: 10px">
+                                                <div style="float: left; color: #7EB6FF;font-size: 16px;">
+                                                    <input type="button" value="MOVE PHASE BACKWARDS" name="select_phase" id="phase"
+                                                           style="width: 482px; height: 40px; clear: left; background-color: #82ccbe; color: #ffffff;
+                                                           margin-right: 0px;font-size: 30px; font-weight: bold" onclick="selectPhase()">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="float: right; color: #7EB6FF;font-size: 16px;">
+                                                    <input type="button" value="MOVE PHASE FORWARD" name="select_phase" id="phase"
+                                                           style="width: 482px; height: 40px; clear: left; background-color: #967dcc; color: #ffffff; font-size: 30px; font-weight: bold" onclick="selectPhase()">
                                                 </div>
                                             </td>
                                         </tr>
@@ -305,6 +665,22 @@ span.type_aa_selected
 </table>
 
 </td></tr>
+
+<div id="overlay">
+    <div>
+        <br>
+        <p>Please select the phase you want to start.</p>
+        <select id="stageDropDown">
+            <option label="op1" value="1">Cutting</option>
+            <option label="op2" value="2">Fabrication/CNC</option>
+            <option label="op3" value="3">Installation</option>
+        </select>
+        <br><br>
+        <span style="text-align: left; padding-right: 40px;"><a href="javascript:select()">Select</a></span>
+        <span style="text-align: left; padding-right: 20px;"><a href="javascript:close()">Close</a></span>
+        <br><br>
+    </div>
+</div>
 
 {literal}
 <script>

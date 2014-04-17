@@ -15,7 +15,8 @@ $loc = $_SESSION["user"]->getLocationProfile();
 abstract class UnitStatus{
     const notStart = 0;
     const inProcess = 1;
-    const Finish = 2;
+    const overwrite = 2;
+    const finish = 3;
 }
 
 //initiate all the unit that not cut yet.
